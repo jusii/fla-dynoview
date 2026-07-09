@@ -258,6 +258,57 @@ button.danger {
 button.danger:hover:not(:disabled) {
   border-color: #ff9db0;
 }
+button.icon {
+  padding: 0.35rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Settings modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  width: min(420px, 92vw);
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.5);
+}
+.modal h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+.modal .field {
+  display: block;
+  margin-bottom: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.modal .field select {
+  display: block;
+  width: 100%;
+  margin-top: 0.3rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.9rem;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
 
 /* Bars */
 .bar {
@@ -366,7 +417,8 @@ button.danger:hover:not(:disabled) {
     size: A4;
     margin: 12mm 14mm;
   }
-  .app {
+  .app,
+  .modal-backdrop {
     display: none !important;
   }
   #print-report {

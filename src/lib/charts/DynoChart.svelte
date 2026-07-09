@@ -2,6 +2,7 @@
   import { scaleLinear } from "d3-scale";
   import { line } from "d3-shape";
   import type { Series } from "./chart-types";
+  import { t } from "../i18n";
 
   let {
     series = [],
@@ -49,7 +50,7 @@
     viewBox="0 0 {width} {height}"
     preserveAspectRatio="xMidYMid meet"
     role="img"
-    aria-label="{yLabel} versus {xLabel}"
+    aria-label="{yLabel} {t('chart.versus')} {xLabel}"
   >
     <rect class="plot-bg" x="0" y="0" width={width} height={height} />
     <g transform="translate({margin.left},{margin.top})">

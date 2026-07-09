@@ -106,6 +106,8 @@ pub struct ResetReport {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Paths {
+    /// The base `fla-dynoview` folder (for a "reveal data folder" action).
+    pub root: String,
     pub db_dir: String,
     pub backups_dir: String,
 }

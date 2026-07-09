@@ -52,8 +52,14 @@ export interface DecodedRun {
 }
 
 export interface Paths {
+  root: string;
   dbDir: string;
   backupsDir: string;
+}
+
+export interface Settings {
+  language: string;
+  unitSystem: "metric" | "imperial";
 }
 
 export interface RunRecord {

@@ -10,6 +10,7 @@ mod db;
 mod error;
 mod model;
 mod reset;
+mod settings;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -31,6 +32,8 @@ pub fn run() {
             commands::reset_image,
             commands::initial_path,
             commands::app_paths,
+            commands::get_settings,
+            commands::set_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running FLA Dynoview");

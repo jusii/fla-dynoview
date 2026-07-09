@@ -8,6 +8,7 @@ import type {
   ResetReport,
   RunIndexEntry,
   RunRecord,
+  Settings,
   ShopInfo,
 } from "./types";
 
@@ -56,3 +57,9 @@ export const resetImage = (imagePath: string, confirm: boolean) =>
 export const appPaths = () => invoke<Paths>("app_paths");
 
 export const initialPath = () => invoke<string | null>("initial_path");
+
+// --- settings ---
+export const getSettings = () => invoke<Settings>("get_settings");
+
+export const setSettings = (settings: Settings) =>
+  invoke<void>("set_settings", { settings });

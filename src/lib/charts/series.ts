@@ -1,5 +1,7 @@
 import type { ChannelsDto } from "../types";
 import type { Series } from "./chart-types";
+import { t } from "../i18n";
+import { power as toPower, torque as toTorque } from "../units";
 
 // Bosch-screen-inspired curve colours.
 export const MAGENTA = "#d94fd9";
@@ -17,8 +19,8 @@ export interface Physical {
   torqueNm: number[];
 }
 
-/// Derive the physically-calibrated curves from the raw channels and DIN factor.
-/// Mirrors `core/src/erg.rs::compute_curves`.
+/// Derive the physically-calibrated curves (kW / Nm) from the raw channels and
+/// DIN factor. Mirrors `core/src/erg.rs::compute_curves`.
 export function physical(ch: ChannelsDto, kDin: number | null): Physical {
   const k = kDin ?? 1;
   const n = Math.min(ch.ch0.length, ch.ch1.length, ch.ch3.length);
@@ -41,18 +43,19 @@ export function physical(ch: ChannelsDto, kDin: number | null): Physical {
   return { rpm, wheelKw, lossKw, engineKw, torqueNm };
 }
 
+// Power/torque values are converted to the active unit system for display.
 export function powerSeries(ch: ChannelsDto, kDin: number | null): Series[] {
   const p = physical(ch, kDin);
   return [
-    { values: p.engineKw, color: MAGENTA, label: "Moottoriteho (engine)" },
-    { values: p.wheelKw, color: CYAN, label: "Pyöräteho (wheel)" },
-    { values: p.lossKw, color: GREEN, label: "Häviöteho (loss)" },
+    { values: p.engineKw.map(toPower), color: MAGENTA, label: t("term.engine") },
+    { values: p.wheelKw.map(toPower), color: CYAN, label: t("term.wheel") },
+    { values: p.lossKw.map(toPower), color: GREEN, label: t("term.loss") },
   ].filter((s) => s.values.length);
 }
 
 export function torqueSeries(ch: ChannelsDto, kDin: number | null): Series[] {
   const p = physical(ch, kDin);
   return [
-    { values: p.torqueNm, color: ORANGE, label: "Vääntömomentti (torque)" },
+    { values: p.torqueNm.map(toTorque), color: ORANGE, label: t("term.torque") },
   ].filter((s) => s.values.length);
 }

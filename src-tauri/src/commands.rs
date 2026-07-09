@@ -31,12 +31,18 @@ fn file_name(path: &str) -> String {
         .unwrap_or_else(|| path.to_string())
 }
 
-fn db_dir(app: &tauri::AppHandle) -> Result<PathBuf, CommandError> {
+/// The app's base folder: `<OS data dir>/fla-dynoview` — a plain name rather
+/// than the reverse-DNS bundle id. Holds `db/` and `settings.json`.
+pub fn app_root(app: &tauri::AppHandle) -> Result<PathBuf, CommandError> {
     let base = app
         .path()
-        .app_data_dir()
+        .data_dir()
         .map_err(|e| CommandError::Other(e.to_string()))?;
-    Ok(base.join("db"))
+    Ok(base.join("fla-dynoview"))
+}
+
+fn db_dir(app: &tauri::AppHandle) -> Result<PathBuf, CommandError> {
+    Ok(app_root(app)?.join("db"))
 }
 
 /// Build a persistable record from raw `.ERG` bytes.
@@ -288,12 +294,29 @@ pub fn initial_path() -> Option<String> {
         .filter(|p| Path::new(p).is_file())
 }
 
-/// Resolved database/backup locations under the OS app-data dir.
+/// Resolved data-folder locations.
 #[tauri::command]
 pub fn app_paths(app: tauri::AppHandle) -> Result<Paths, CommandError> {
-    let db = db_dir(&app)?;
+    let root = app_root(&app)?;
+    let db = root.join("db");
     Ok(Paths {
+        root: root.to_string_lossy().into_owned(),
         db_dir: db.to_string_lossy().into_owned(),
         backups_dir: db.join("backups").to_string_lossy().into_owned(),
     })
+}
+
+/// Load persisted settings (language, unit system).
+#[tauri::command]
+pub fn get_settings(app: tauri::AppHandle) -> Result<crate::settings::Settings, CommandError> {
+    Ok(crate::settings::load(&app_root(&app)?))
+}
+
+/// Persist settings.
+#[tauri::command]
+pub fn set_settings(
+    app: tauri::AppHandle,
+    settings: crate::settings::Settings,
+) -> Result<(), CommandError> {
+    crate::settings::save(&app_root(&app)?, &settings)
 }

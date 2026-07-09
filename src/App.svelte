@@ -1,10 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { ask, open } from "@tauri-apps/plugin-dialog";
+  import { openPath } from "@tauri-apps/plugin-opener";
   import * as api from "./lib/api";
   import type { CurrentRun, DecodedRun, ImageSummary, RunEntry, RunIndexEntry, RunRecord } from "./lib/types";
   import RunDetail from "./lib/components/RunDetail.svelte";
   import PrintReport from "./lib/components/PrintReport.svelte";
+  import { t, LOCALES } from "./lib/i18n";
+  import type { Locale } from "./lib/i18n";
+  import { lang, unitSys, setLanguage, setUnitSystem } from "./lib/settings.svelte";
+  import type { UnitSystem } from "./lib/units";
 
   type Mode = "browse" | "library";
 
@@ -17,6 +22,7 @@
   let busy = $state(false);
   let err = $state<string | null>(null);
   let toast = $state<string | null>(null);
+  let showSettings = $state(false);
 
   function baseName(p: string): string {
     return p.split(/[\\/]/).pop() ?? p;
@@ -54,8 +60,7 @@
     if (typeof path !== "string") return;
     busy = true;
     try {
-      const run = await api.openErgFile(path);
-      current = fromDecoded(run, baseName(path));
+      current = fromDecoded(await api.openErgFile(path), baseName(path));
       selectedKey = path;
     } catch (e) { err = String(e); } finally { busy = false; }
   }
@@ -65,8 +70,7 @@
     selectedKey = r.path;
     busy = true; err = null;
     try {
-      const run = await api.readErgFromImage(image.imagePath, r.path);
-      current = fromDecoded(run, r.name);
+      current = fromDecoded(await api.readErgFromImage(image.imagePath, r.path), r.name);
     } catch (e) { err = String(e); current = null; } finally { busy = false; }
   }
 
@@ -92,41 +96,39 @@
   async function importNew() {
     if (!image) return;
     const paths = image.runs.filter((r) => !r.deleted && !r.inLibrary).map((r) => r.path);
-    if (!paths.length) { toast = "Nothing new to import — all runs are already in the library."; return; }
+    if (!paths.length) { toast = t("toast.nothingNew"); return; }
     busy = true; err = null;
     try {
       const rep = await api.importRuns(image.imagePath, paths, false);
-      toast = `Imported ${rep.added.length} new run(s); skipped ${rep.skipped.length}${rep.failed.length ? `, ${rep.failed.length} failed` : ""}.`;
+      toast = t("toast.imported", { added: rep.added.length, skipped: rep.skipped.length });
       image = await api.openImage(image.imagePath);
     } catch (e) { err = String(e); } finally { busy = false; }
   }
 
   async function importAllOverwrite() {
     if (!image) return;
-    const ok = await ask(
-      `Re-import ALL ${image.runs.filter((r) => !r.deleted).length} runs and OVERWRITE any copies already in the library?`,
-      { title: "Import all / overwrite", kind: "warning" },
-    );
+    const ok = await ask(t("dialog.importAllMsg", { count: image.runs.filter((r) => !r.deleted).length }), {
+      title: t("dialog.importAllTitle"), kind: "warning",
+    });
     if (!ok) return;
     busy = true; err = null;
     try {
       const rep = await api.importAll(image.imagePath, true, false);
-      toast = `Imported ${rep.added.length}, overwrote ${rep.overwritten.length}.`;
+      toast = t("toast.importedOver", { added: rep.added.length, overwritten: rep.overwritten.length });
       image = await api.openImage(image.imagePath);
     } catch (e) { err = String(e); } finally { busy = false; }
   }
 
   async function doReset() {
     if (!image) return;
-    const ok = await ask(
-      `Delete ALL dyno runs from this disk image?\n\nSettings & calibration (FLA.CFG), language tables and fonts are kept. A timestamped backup of the image is saved first.\n\n${image.imagePath}`,
-      { title: "Reset disk", kind: "warning" },
-    );
+    const ok = await ask(t("dialog.resetMsg", { path: image.imagePath }), {
+      title: t("dialog.resetTitle"), kind: "warning",
+    });
     if (!ok) return;
     busy = true; err = null;
     try {
       const rep = await api.resetImage(image.imagePath, true);
-      toast = `Wiped ${rep.deleted.length} run(s). Backup saved to ${rep.backupPath}`;
+      toast = t("toast.wiped", { deleted: rep.deleted.length, path: rep.backupPath });
       image = await api.openImage(image.imagePath);
       current = null; selectedKey = null;
     } catch (e) { err = String(e); } finally { busy = false; }
@@ -137,16 +139,14 @@
     busy = true; err = null;
     try {
       await api.updateRunDescription(current.libId, current.description);
-      toast = "Description saved.";
+      toast = t("toast.descSaved");
       await refreshLibrary();
     } catch (e) { err = String(e); } finally { busy = false; }
   }
 
   async function deleteCurrent() {
     if (!current?.libId) return;
-    const ok = await ask("Remove this run from your library? (The source disk is not touched.)", {
-      title: "Delete run", kind: "warning",
-    });
+    const ok = await ask(t("dialog.deleteMsg"), { title: t("dialog.deleteTitle"), kind: "warning" });
     if (!ok) return;
     busy = true; err = null;
     try {
@@ -158,6 +158,13 @@
 
   function printReport() {
     window.print();
+  }
+
+  async function revealFolder() {
+    try {
+      const p = await api.appPaths();
+      await openPath(p.root);
+    } catch (e) { err = String(e); }
   }
 
   const newCount = $derived(image ? image.runs.filter((r) => !r.deleted && !r.inLibrary).length : 0);
@@ -178,21 +185,24 @@
   });
 </script>
 
+<svelte:window onkeydown={(e) => { if (e.key === "Escape") showSettings = false; }} />
+
 <div class="app">
   <header class="toolbar">
     <div class="brand">FLA&nbsp;Dynoview</div>
-    <button onclick={pickImage} disabled={busy}>Open .img…</button>
-    <button onclick={pickErg} disabled={busy}>Open .ERG…</button>
+    <button onclick={pickImage} disabled={busy}>{t("app.openImg")}</button>
+    <button onclick={pickErg} disabled={busy}>{t("app.openErg")}</button>
     <div class="tabs">
-      <button class:tabsel={mode === "browse"} onclick={() => switchMode("browse")}>Disk</button>
-      <button class:tabsel={mode === "library"} onclick={() => switchMode("library")}>Library</button>
+      <button class:tabsel={mode === "browse"} onclick={() => switchMode("browse")}>{t("app.tabDisk")}</button>
+      <button class:tabsel={mode === "library"} onclick={() => switchMode("library")}>{t("app.tabLibrary")}</button>
     </div>
     <div class="spacer"></div>
     {#if current}
-      <button class="primary" onclick={printReport}>Print / PDF…</button>
+      <button class="primary" onclick={printReport}>{t("app.printPdf")}</button>
     {/if}
+    <button class="icon" title={t("app.settings")} onclick={() => (showSettings = true)}>⚙</button>
     {#if image && mode === "browse"}
-      <div class="shop">🏁 {image.shopName || "(no shop name)"}</div>
+      <div class="shop">🏁 {image.shopName || t("app.shopFallback")}</div>
     {/if}
   </header>
 
@@ -208,13 +218,11 @@
       {#if mode === "browse"}
         {#if image}
           <div class="side-actions">
-            <button onclick={importNew} disabled={busy || newCount === 0}>
-              Import new ({newCount})
-            </button>
-            <button onclick={importAllOverwrite} disabled={busy}>Import all…</button>
-            <button class="danger" onclick={doReset} disabled={busy}>Reset disk…</button>
+            <button onclick={importNew} disabled={busy || newCount === 0}>{t("app.importNew", { count: newCount })}</button>
+            <button onclick={importAllOverwrite} disabled={busy}>{t("app.importAll")}</button>
+            <button class="danger" onclick={doReset} disabled={busy}>{t("app.resetDisk")}</button>
           </div>
-          <div class="side-head">{image.runs.length} run{image.runs.length === 1 ? "" : "s"}</div>
+          <div class="side-head">{t("app.runsHeader", { count: image.runs.length })}</div>
           <ul class="runlist">
             {#each image.runs as r, i (r.path + "#" + i)}
               <li>
@@ -226,34 +234,30 @@
                 >
                   <span class="rname">{r.name}</span>
                   <span class="rdate">{r.date ?? "—"}</span>
-                  {#if r.inLibrary}<span class="chk" title="In library">✓</span>{/if}
-                  {#if r.deleted}<span class="tag">deleted</span>{/if}
+                  {#if r.inLibrary}<span class="chk" title={t("app.inLibrary")}>✓</span>{/if}
+                  {#if r.deleted}<span class="tag">{t("app.deleted")}</span>{/if}
                 </button>
               </li>
             {/each}
           </ul>
         {:else}
-          <div class="empty">
-            <p>Open a Bosch FLA&nbsp;203 floppy image (<code>.img</code>) to browse its dyno
-            runs, or open a single <code>.ERG</code> file.</p>
-          </div>
+          <div class="empty"><p>{t("app.browseEmpty")}</p></div>
         {/if}
       {:else}
         <div class="side-actions">
-          <input class="search" placeholder="Search description / date…"
-                 bind:value={libQuery} oninput={refreshLibrary} />
+          <input class="search" placeholder={t("app.searchPlaceholder")} bind:value={libQuery} oninput={refreshLibrary} />
         </div>
-        <div class="side-head">{library.length} in library</div>
+        <div class="side-head">{t("app.libraryHeader", { count: library.length })}</div>
         <ul class="runlist">
           {#each library as e (e.id)}
             <li>
               <button class="runitem libitem" class:active={selectedKey === e.id} onclick={() => selectLibRun(e)}>
                 <span class="rdate strong">{e.runDate ?? "—"}</span>
-                <span class="rdesc">{e.description || e.sourceImage || "(no description)"}</span>
+                <span class="rdesc">{e.description || e.sourceImage || t("app.noDescription")}</span>
               </button>
             </li>
           {:else}
-            <li class="empty"><p>No runs imported yet. Open a disk and “Import new”.</p></li>
+            <li class="empty"><p>{t("app.libraryEmpty")}</p></li>
           {/each}
         </ul>
       {/if}
@@ -264,27 +268,53 @@
         <RunDetail {current} />
         {#if current.libId}
           <section class="desc-editor">
-            <label for="desc">Description</label>
-            <textarea id="desc" rows="2" bind:value={current.description}
-                      placeholder="Customer, vehicle, notes…"></textarea>
+            <label for="desc">{t("app.description")}</label>
+            <textarea id="desc" rows="2" bind:value={current.description} placeholder={t("app.descPlaceholder")}></textarea>
             <div class="desc-actions">
-              <button class="primary" onclick={saveDescription} disabled={busy}>Save</button>
-              <button class="danger" onclick={deleteCurrent} disabled={busy}>Delete from library</button>
+              <button class="primary" onclick={saveDescription} disabled={busy}>{t("app.save")}</button>
+              <button class="danger" onclick={deleteCurrent} disabled={busy}>{t("app.deleteFromLibrary")}</button>
             </div>
           </section>
         {/if}
       {:else}
         <div class="placeholder">
           {#if busy}
-            Loading…
+            {t("app.loading")}
           {:else}
-            <div class="ph-inner"><div class="ph-logo">📈</div><p>Select a run to view its curves.</p></div>
+            <div class="ph-inner"><div class="ph-logo">📈</div><p>{t("app.selectRun")}</p></div>
           {/if}
         </div>
       {/if}
     </main>
   </div>
 </div>
+
+{#if showSettings}
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="modal-backdrop" role="presentation" onclick={() => (showSettings = false)}>
+    <div class="modal" role="dialog" aria-modal="true" tabindex="-1" onclick={(e) => e.stopPropagation()}>
+      <h2>{t("settings.title")}</h2>
+      <label class="field">
+        {t("settings.language")}
+        <select value={lang()} onchange={(e) => setLanguage(e.currentTarget.value as Locale)}>
+          {#each LOCALES as l (l.code)}<option value={l.code}>{l.name}</option>{/each}
+        </select>
+      </label>
+      <label class="field">
+        {t("settings.units")}
+        <select value={unitSys()} onchange={(e) => setUnitSystem(e.currentTarget.value as UnitSystem)}>
+          <option value="metric">{t("settings.unitMetric")}</option>
+          <option value="imperial">{t("settings.unitImperial")}</option>
+        </select>
+      </label>
+      <div class="modal-actions">
+        <button onclick={revealFolder}>{t("settings.revealFolder")}</button>
+        <button class="primary" onclick={() => (showSettings = false)}>{t("settings.close")}</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 {#if current}
   <PrintReport shopName={image?.shopName ?? ""} {current} />

@@ -8,6 +8,20 @@ floppy on a modern PC so you can **view, archive, and print/PDF** your dyno runs
 > Not affiliated with or endorsed by Robert Bosch GmbH. "Bosch" and "FLA" are
 > used only to describe hardware compatibility.
 
+## Install & usage guides
+
+The app is localized into every language the FLA 203 supports. Install & usage:
+[Deutsch](docs/de/install-and-usage.md) ·
+[English](docs/en/install-and-usage.md) ·
+[Español](docs/es/install-and-usage.md) ·
+[Français](docs/fr/install-and-usage.md) ·
+[Italiano](docs/it/install-and-usage.md) ·
+[Nederlands](docs/nl/install-and-usage.md) ·
+[Português](docs/pt/install-and-usage.md) ·
+[Suomi](docs/fi/install-and-usage.md) ·
+[Dansk](docs/da/install-and-usage.md) ·
+[日本語](docs/ja/install-and-usage.md)
+
 ## Features
 
 - **Open a floppy image** (`.img`, e.g. captured from a Gotek) or a single

@@ -6,6 +6,11 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [svelte()],
+  // Tauri's webviews are modern (WebView2 / WKWebView / WebKitGTK) — allow
+  // top-level await and other recent syntax.
+  build: {
+    target: "esnext",
+  },
   // Tauri expects a fixed port and its own clear-screen behaviour.
   clearScreen: false,
   server: {
