@@ -464,9 +464,11 @@ button.icon {
   display: none;
 }
 @media print {
+  /* No `size`/orientation here: on WebKitGTK a CSS page-size conflicts with the
+     print dialog's own orientation and yields blank pages. Let the dialog decide
+     (pick Landscape there); we only set margins. */
   @page {
-    size: A4 landscape;
-    margin: 10mm 12mm;
+    margin: 10mm;
   }
   /* Kill the app's dark background so empty page area prints white (no black box). */
   html,
