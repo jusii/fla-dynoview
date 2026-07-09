@@ -1,7 +1,8 @@
 name: release
 
-# Cut a release:  git tag app-v0.1.0 && git push origin app-v0.1.0
-# All matrix jobs converge into ONE draft GitHub Release; review it, then Publish.
+# Cut a release:  git tag app-v0.1.2 && git push origin app-v0.1.2
+# One job creates the release, the build matrix uploads to it (via releaseId, so
+# no duplicate-release race), then it is published automatically.
 on:
   push:
     tags:
@@ -9,10 +10,38 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write # the only scope needed to create the Release + upload assets
+  contents: write
 
 jobs:
-  publish:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create the draft release
+        id: create
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            const { data } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `FLA Dynoview ${tag}`,
+              body: [
+                'Unsigned builds — see the README for first-launch instructions:',
+                '- macOS: right-click the app → Open (once), or `xattr -cr` it.',
+                '- Windows: SmartScreen → More info → Run anyway.',
+              ].join('\n'),
+              draft: true,
+              prerelease: false,
+            });
+            core.setOutput('release_id', data.id);
+
+  build:
+    needs: create-release
     strategy:
       fail-fast: false
       matrix:
@@ -63,17 +92,25 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build app and attach to draft Release
+      - name: Build app and upload to the release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "FLA Dynoview ${{ github.ref_name }}"
-          releaseBody: |
-            Unsigned builds — see the README for first-launch instructions:
-            - macOS: right-click the app → Open (once), or `xattr -cr` it.
-            - Windows: SmartScreen → More info → Run anyway.
-          releaseDraft: true
-          prerelease: false
+          releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }}
+
+  publish:
+    needs: [create-release, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ needs.create-release.outputs.release_id }},
+              draft: false,
+            });
