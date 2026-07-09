@@ -69,7 +69,13 @@ pub struct ResultsDto {
     pub pnim_kw: Option<i16>,
     pub pressure_hpa: Option<i16>,
     pub temp_c: Option<i16>,
-    pub rpm_raw: Option<i16>,
+    pub k_din: Option<f32>,
+    pub pmax_kw: Option<f32>,
+    pub rpm_at_pmax: Option<i32>,
+    pub ppyora_kw: Option<f32>,
+    pub phavio_kw: Option<f32>,
+    pub mmax_nm: Option<f32>,
+    pub rpm_at_mmax: Option<i32>,
     /// `(offset, value)` of every non-zero even-offset i16 in the trailer.
     pub trailer_scan: Vec<(u16, i16)>,
 }
@@ -152,7 +158,13 @@ impl From<&Results> for ResultsDto {
             pnim_kw: r.pnim_kw,
             pressure_hpa: r.pressure_hpa,
             temp_c: r.temp_c,
-            rpm_raw: r.rpm_raw,
+            k_din: r.k_din,
+            pmax_kw: r.pmax_kw,
+            rpm_at_pmax: r.rpm_at_pmax,
+            ppyora_kw: r.ppyora_kw,
+            phavio_kw: r.phavio_kw,
+            mmax_nm: r.mmax_nm,
+            rpm_at_mmax: r.rpm_at_mmax,
             trailer_scan: r.trailer_scan.clone(),
         }
     }

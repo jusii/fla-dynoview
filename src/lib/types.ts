@@ -32,7 +32,13 @@ export interface ResultsDto {
   pnimKw: number | null;
   pressureHpa: number | null;
   tempC: number | null;
-  rpmRaw: number | null;
+  kDin: number | null;
+  pmaxKw: number | null;
+  rpmAtPmax: number | null;
+  ppyoraKw: number | null;
+  phavioKw: number | null;
+  mmaxNm: number | null;
+  rpmAtMmax: number | null;
   trailerScan: [number, number][];
 }
 

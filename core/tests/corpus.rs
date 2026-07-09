@@ -36,10 +36,25 @@ fn dska0000_live_run_and_shop_name() {
     let d = run.date.expect("run carries a date");
     assert_eq!((d.year, d.month, d.day), (2021, 7, 1), "trailer date");
 
-    // The three trailer offsets confirmed against the on-screen info box.
+    // Stored trailer scalars, confirmed against the on-screen info box.
     assert_eq!(run.results.pnim_kw, Some(200), "Pnim");
     assert_eq!(run.results.pressure_hpa, Some(975), "Paine");
     assert_eq!(run.results.temp_c, Some(21), "Lämp");
+
+    // Computed physical values, verified against the machine's own screenshots
+    // of this run (#1 in power + torque views).
+    let r = &run.results;
+    let approx = |a: Option<f32>, want: f32, tol: f32, name: &str| {
+        let got = a.unwrap_or_else(|| panic!("{name} missing"));
+        assert!((got - want).abs() <= tol, "{name}: got {got}, want ~{want}");
+    };
+    approx(r.k_din, 1.041, 0.002, "k (DIN)");
+    approx(r.pmax_kw, 16.8, 0.3, "Pmax");
+    approx(r.ppyora_kw, 11.8, 0.2, "Ppyörä");
+    approx(r.phavio_kw, 4.4, 0.2, "Phäviö");
+    approx(r.mmax_nm, 188.8, 1.5, "Mmax");
+    assert_eq!(r.rpm_at_pmax, Some(1130), "rpm @ Pmax");
+    assert_eq!(r.rpm_at_mmax, Some(440), "rpm @ Mmax");
 
     // The trailer date should agree with the FAT directory timestamp.
     if let Some(ts) = ent.mtime {
