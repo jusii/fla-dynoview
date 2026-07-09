@@ -32,6 +32,8 @@ pub struct RunEntry {
     pub deleted: bool,
     pub sha256: String,
     pub date: Option<String>,
+    /// Whether this run (by sha256) is already saved in the local library.
+    pub in_library: bool,
 }
 
 /// Summary of an opened floppy image.
@@ -84,12 +86,64 @@ pub struct DecodedRunDto {
     pub results: ResultsDto,
 }
 
+/// Result of resetting (wiping the dyno runs from) an image.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResetReport {
+    /// Where the pre-reset backup of the image was written.
+    pub backup_path: String,
+    /// The `.ERG` run files that were removed.
+    pub deleted: Vec<String>,
+}
+
 /// Resolved on-disk locations (for a "reveal database" affordance).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Paths {
     pub db_dir: String,
     pub backups_dir: String,
+}
+
+/// A full run record persisted to the library (`db/runs/<yyyy>/<date>/<id>.json`).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunRecord {
+    pub schema_version: u32,
+    pub id: String,
+    pub sha256: String,
+    pub source_image: Option<String>,
+    pub source_entry: Option<String>,
+    pub was_deleted_entry: bool,
+    pub run_date: Option<String>,
+    pub imported_at: String,
+    pub description: String,
+    pub results: ResultsDto,
+    pub channels: ChannelsDto,
+}
+
+/// A lightweight index row for fast library browsing (no channel arrays).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunIndexEntry {
+    pub id: String,
+    pub sha256: String,
+    pub run_date: Option<String>,
+    pub source_image: Option<String>,
+    pub pnim_kw: Option<i16>,
+    pub description: String,
+    pub imported_at: String,
+    /// Path to the full record, relative to the `db/` directory.
+    pub path: String,
+}
+
+/// Result of an import operation. Values are the run display names.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImportReport {
+    pub added: Vec<String>,
+    pub skipped: Vec<String>,
+    pub overwritten: Vec<String>,
+    pub failed: Vec<String>,
 }
 
 impl From<&Results> for ResultsDto {

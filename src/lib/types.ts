@@ -8,6 +8,7 @@ export interface RunEntry {
   deleted: boolean;
   sha256: string;
   date: string | null;
+  inLibrary: boolean;
 }
 
 export interface ImageSummary {
@@ -47,4 +48,52 @@ export interface DecodedRun {
 export interface Paths {
   dbDir: string;
   backupsDir: string;
+}
+
+export interface RunRecord {
+  schemaVersion: number;
+  id: string;
+  sha256: string;
+  sourceImage: string | null;
+  sourceEntry: string | null;
+  wasDeletedEntry: boolean;
+  runDate: string | null;
+  importedAt: string;
+  description: string;
+  results: ResultsDto;
+  channels: ChannelsDto;
+}
+
+export interface RunIndexEntry {
+  id: string;
+  sha256: string;
+  runDate: string | null;
+  sourceImage: string | null;
+  pnimKw: number | null;
+  description: string;
+  importedAt: string;
+  path: string;
+}
+
+export interface ImportReport {
+  added: string[];
+  skipped: string[];
+  overwritten: string[];
+  failed: string[];
+}
+
+export interface ResetReport {
+  backupPath: string;
+  deleted: string[];
+}
+
+/// A run currently being viewed, from either an image or the library.
+export interface CurrentRun {
+  title: string;
+  date: string | null;
+  description: string;
+  results: ResultsDto;
+  channels: ChannelsDto;
+  /// Library record id when this run is saved in the library, else null.
+  libId: string | null;
 }

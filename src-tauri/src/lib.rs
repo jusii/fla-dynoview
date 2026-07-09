@@ -6,8 +6,10 @@
 //! off the webview thread.
 
 mod commands;
+mod db;
 mod error;
 mod model;
+mod reset;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,6 +22,13 @@ pub fn run() {
             commands::read_erg_from_image,
             commands::parse_erg,
             commands::get_shop_header,
+            commands::import_runs,
+            commands::import_all,
+            commands::list_db_runs,
+            commands::get_db_run,
+            commands::update_run_description,
+            commands::delete_db_run,
+            commands::reset_image,
             commands::initial_path,
             commands::app_paths,
         ])
