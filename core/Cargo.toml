@@ -1,0 +1,16 @@
+[package]
+name = "fladyno-core"
+description = "Parser core for Bosch FLA 203 dyno floppy images and .ERG run files"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+name = "fladyno_core"
+path = "src/lib.rs"
+
+# Pure std for now (parser core). serde/sha2/chrono are added when the Tauri
+# app wires this crate in, behind features, to keep offline `cargo test` fast.
+[dependencies]

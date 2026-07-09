@@ -1,0 +1,34 @@
+# Rust
+/target
+**/target
+
+# Node
+node_modules
+dist
+.vite
+
+# Tauri generated
+src-tauri/gen
+src-tauri/target
+
+# Generated TS bindings (regenerated from Rust)
+# src/lib/bindings
+
+# Local dyno data / disk images — never commit copyrighted Bosch program disks
+*.img
+*.ERG
+*.erg
+*.scp
+*.hfe
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Mobile icon sets (desktop-only app; regenerate with `tauri icon`)
+src-tauri/icons/android
+src-tauri/icons/ios

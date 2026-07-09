@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["core", "src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Jusii <jussi@alanara.fi>"]
+repository = "https://github.com/jusii/fla-dynoview"
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
