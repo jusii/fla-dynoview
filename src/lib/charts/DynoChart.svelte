@@ -6,42 +6,50 @@
 
   let {
     series = [],
+    rpm = [],
     xLabel = "",
-    yLabel = "",
-    width = 680,
-    height = 440,
+    leftLabel = "",
+    rightLabel = "",
+    width = 760,
+    height = 460,
   }: {
     series?: Series[];
+    rpm?: number[];
     xLabel?: string;
-    yLabel?: string;
+    leftLabel?: string;
+    rightLabel?: string;
     width?: number;
     height?: number;
   } = $props();
 
-  const margin = { top: 18, right: 18, bottom: 44, left: 56 };
-
+  const margin = { top: 18, right: 54, bottom: 46, left: 54 };
   const innerW = $derived(width - margin.left - margin.right);
   const innerH = $derived(height - margin.top - margin.bottom);
 
-  const allValues = $derived(series.flatMap((s) => s.values));
-  const maxLen = $derived(Math.max(1, ...series.map((s) => s.values.length)));
-  const yMin = $derived(allValues.length ? Math.min(0, ...allValues) : 0);
-  const yMax = $derived(allValues.length ? Math.max(1, ...allValues) : 1);
+  const leftSeries = $derived(series.filter((s) => s.axis !== "right"));
+  const rightSeries = $derived(series.filter((s) => s.axis === "right"));
 
-  const x = $derived(
-    scaleLinear().domain([0, Math.max(1, maxLen - 1)]).range([0, innerW]),
-  );
-  const y = $derived(
-    scaleLinear().domain([yMin, yMax]).nice().range([innerH, 0]),
-  );
+  function extent(list: Series[]): [number, number] {
+    const vals = list.flatMap((s) => s.values);
+    if (!vals.length) return [0, 1];
+    return [Math.min(0, ...vals), Math.max(1, ...vals)];
+  }
+  const leftDom = $derived(extent(leftSeries));
+  const rightDom = $derived(extent(rightSeries));
 
-  const gen = $derived(
-    line<number>()
-      .x((_d, i) => x(i))
-      .y((d) => y(d)),
+  // X is the engine-rpm domain (a proper dyno rpm axis).
+  const rpmDom = $derived<[number, number]>(
+    rpm.length ? [Math.min(...rpm), Math.max(...rpm)] : [0, 1],
   );
+  const x = $derived(scaleLinear().domain(rpmDom).nice().range([0, innerW]));
+  const yL = $derived(scaleLinear().domain(leftDom).nice().range([innerH, 0]));
+  const yR = $derived(scaleLinear().domain(rightDom).nice().range([innerH, 0]));
 
-  const yTicks = $derived(y.ticks(6));
+  const genL = $derived(line<number>().x((_d, i) => x(rpm[i])).y((d) => yL(d)));
+  const genR = $derived(line<number>().x((_d, i) => x(rpm[i])).y((d) => yR(d)));
+
+  const yLTicks = $derived(yL.ticks(6));
+  const yRTicks = $derived(yR.ticks(6));
   const xTicks = $derived(x.ticks(8));
 </script>
 
@@ -50,36 +58,43 @@
     viewBox="0 0 {width} {height}"
     preserveAspectRatio="xMidYMid meet"
     role="img"
-    aria-label="{yLabel} {t('chart.versus')} {xLabel}"
+    aria-label="{leftLabel} / {rightLabel} {t('chart.versus')} {xLabel}"
   >
     <rect class="plot-bg" x="0" y="0" width={width} height={height} />
     <g transform="translate({margin.left},{margin.top})">
-      {#each yTicks as t (t)}
-        <line class="grid" x1="0" x2={innerW} y1={y(t)} y2={y(t)} />
-        <text class="tick" x="-9" y={y(t)} dy="0.32em" text-anchor="end">{t}</text>
+      {#each yLTicks as tk (tk)}
+        <line class="grid" x1="0" x2={innerW} y1={yL(tk)} y2={yL(tk)} />
+        <text class="tick" x="-9" y={yL(tk)} dy="0.32em" text-anchor="end">{tk}</text>
       {/each}
-      {#each xTicks as t (t)}
-        <line class="grid grid-x" x1={x(t)} x2={x(t)} y1="0" y2={innerH} />
-        <text class="tick" x={x(t)} y={innerH + 20} text-anchor="middle">{t}</text>
+      {#each yRTicks as tk (tk)}
+        <text class="tick tick-r" x={innerW + 9} y={yR(tk)} dy="0.32em" text-anchor="start">{tk}</text>
+      {/each}
+      {#each xTicks as tk (tk)}
+        <line class="grid grid-x" x1={x(tk)} x2={x(tk)} y1="0" y2={innerH} />
+        <text class="tick" x={x(tk)} y={innerH + 20} text-anchor="middle">{tk}</text>
       {/each}
 
-      {#if yMin < 0 && yMax > 0}
-        <line class="axis-zero" x1="0" x2={innerW} y1={y(0)} y2={y(0)} />
+      {#if leftDom[0] < 0 && leftDom[1] > 0}
+        <line class="axis-zero" x1="0" x2={innerW} y1={yL(0)} y2={yL(0)} />
       {/if}
 
-      {#each series as s (s.label)}
-        <path d={gen(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.7" />
+      {#each leftSeries as s (s.label)}
+        <path d={genL(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.8" />
+      {/each}
+      {#each rightSeries as s (s.label)}
+        <path d={genR(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.8" stroke-dasharray="5 3" />
       {/each}
 
-      <text class="axis-label" x={-margin.left + 4} y="-6">{yLabel}</text>
-      <text class="axis-label" x={innerW} y={innerH + 38} text-anchor="end">{xLabel}</text>
+      <text class="axis-label" x={-margin.left + 4} y="-6">{leftLabel}</text>
+      <text class="axis-label" x={innerW + margin.right - 4} y="-6" text-anchor="end">{rightLabel}</text>
+      <text class="axis-label" x={innerW / 2} y={innerH + 40} text-anchor="middle">{xLabel}</text>
     </g>
   </svg>
 
   <div class="legend">
     {#each series as s (s.label)}
       <span class="legend-item">
-        <span class="swatch" style="background:{s.color}"></span>{s.label}
+        <span class="swatch" style="background:{s.color}"></span>{s.label}{#if s.axis === "right"} ⟶{/if}
       </span>
     {/each}
   </div>
@@ -121,8 +136,9 @@
   }
   .legend {
     display: flex;
-    gap: 1.2rem;
-    padding: 0.35rem 0 0 0.4rem;
+    flex-wrap: wrap;
+    gap: 1.1rem;
+    padding: 0.4rem 0 0 0.4rem;
     font-size: 0.82rem;
   }
   .legend-item {
@@ -131,12 +147,11 @@
     gap: 0.4rem;
   }
   .swatch {
-    width: 14px;
+    width: 16px;
     height: 3px;
     border-radius: 2px;
   }
 
-  /* Print: keep the plot readable on white paper without wasting ink. */
   @media print {
     .plot-bg {
       fill: #ffffff;

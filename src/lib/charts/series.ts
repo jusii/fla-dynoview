@@ -60,8 +60,10 @@ export interface CropScalars {
 }
 
 export interface Views {
-  power: Series[];
-  torque: Series[];
+  /** Power curves (left axis) + torque (right axis), one combined list. */
+  series: Series[];
+  /** Engine rpm per sample, for the X-axis labels (same length as the series). */
+  rpm: number[];
   scalars: CropScalars;
 }
 
@@ -77,7 +79,8 @@ function argmax(a: number[]): number {
   return bi;
 }
 
-/// Build the display series + recomputed peak scalars for the (optionally
+/// Build the combined display series (power on the left axis, torque on the
+/// right), the rpm axis, and recomputed peak scalars for the (optionally
 /// cropped) run. Values are converted to the active unit system.
 export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): Views {
   const p = physical(ch, kDin);
@@ -98,14 +101,13 @@ export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): V
   const rpm = p.rpm.slice(a, b);
   const tq = p.torqueNm.slice(a, b);
 
-  const power: Series[] = [
-    { values: eng.map(toPower), color: MAGENTA, label: t("term.engine") },
-    { values: whl.map(toPower), color: CYAN, label: t("term.wheel") },
-    { values: loss.map(toPower), color: GREEN, label: t("term.loss") },
-  ].filter((s) => s.values.length);
-  const torque: Series[] = [
-    { values: tq.map(toTorque), color: ORANGE, label: t("term.torque") },
-  ].filter((s) => s.values.length);
+  const all: Series[] = [
+    { values: eng.map(toPower), color: MAGENTA, label: t("term.engine"), axis: "left" },
+    { values: whl.map(toPower), color: CYAN, label: t("term.wheel"), axis: "left" },
+    { values: loss.map(toPower), color: GREEN, label: t("term.loss"), axis: "left" },
+    { values: tq.map(toTorque), color: ORANGE, label: t("term.torque"), axis: "right" },
+  ];
+  const series = all.filter((s) => s.values.length);
 
   let scalars: CropScalars = {
     pmaxKw: null,
@@ -127,5 +129,5 @@ export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): V
       rpmAtMmax: rpm[mi],
     };
   }
-  return { power, torque, scalars };
+  return { series, rpm, scalars };
 }

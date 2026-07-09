@@ -43,7 +43,7 @@
   </div>
 </section>
 
-{#if v.power.length}
+{#if v.series.length}
   <div class="crop-bar">
     <span class="crop-label">{t("crop.trim")}</span>
     <input type="range" min="0" max="98" value={Math.round(crop.start * 100)} oninput={setStart} aria-label="{t('crop.trim')} start" />
@@ -55,19 +55,17 @@
 
 <section class="charts">
   <div class="chart-card">
-    <h3>{t("term.engine")}</h3>
-    {#if v.power.length}
-      <DynoChart series={v.power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} />
+    <h3>{t("term.engine")} / {t("term.torque")}</h3>
+    {#if v.series.length}
+      <DynoChart
+        series={v.series}
+        rpm={v.rpm}
+        leftLabel={U.unitPower()}
+        rightLabel={U.unitTorque()}
+        xLabel={U.unitRpm()}
+      />
     {:else}
       <p class="muted">{t("detail.noPower")}</p>
-    {/if}
-  </div>
-  <div class="chart-card">
-    <h3>{t("term.torque")}</h3>
-    {#if v.torque.length}
-      <DynoChart series={v.torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} />
-    {:else}
-      <p class="muted">{t("detail.noTorque")}</p>
     {/if}
   </div>
 </section>

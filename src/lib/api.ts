@@ -46,6 +46,9 @@ export const getDbRun = (id: string) => invoke<RunRecord>("get_db_run", { id });
 export const updateRunDescription = (id: string, description: string) =>
   invoke<void>("update_run_description", { id, description });
 
+export const updateRunDate = (id: string, date: string) =>
+  invoke<void>("update_run_date", { id, date });
+
 export const deleteDbRun = (id: string) =>
   invoke<void>("delete_db_run", { id });
 

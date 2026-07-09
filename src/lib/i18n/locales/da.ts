@@ -70,6 +70,8 @@ const da: Messages = {
   "print.generatedBy": "Genereret af FLA Dynoview",
   "crop.trim": "Beskær",
   "crop.reset": "Nulstil",
+  "app.runDate": "Dato",
+  "app.dateNow": "Nu",
 };
 
 export default da;

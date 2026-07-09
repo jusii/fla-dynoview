@@ -62,12 +62,8 @@
   </table>
 
   <div class="chart-block">
-    <h4>{t("term.engine")} [{U.unitPower()}]</h4>
-    {#if v.power.length}<DynoChart series={v.power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
-  </div>
-  <div class="chart-block">
-    <h4>{t("term.torque")} [{U.unitTorque()}]</h4>
-    {#if v.torque.length}<DynoChart series={v.torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
+    <h4>{t("term.engine")} [{U.unitPower()}] / {t("term.torque")} [{U.unitTorque()}]</h4>
+    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={760} height={380} />{/if}
   </div>
 
   <footer class="pr-foot">{t("print.generatedBy")}</footer>

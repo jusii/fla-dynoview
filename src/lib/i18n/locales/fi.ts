@@ -69,6 +69,8 @@ const fi: Messages = {
   "print.generatedBy": "Luonut FLA Dynoview",
   "crop.trim": "Rajaa",
   "crop.reset": "Palauta",
+  "app.runDate": "Päivämäärä",
+  "app.dateNow": "Nyt",
 };
 
 export default fi;

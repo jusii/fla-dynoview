@@ -28,6 +28,7 @@ pub fn run() {
             commands::list_db_runs,
             commands::get_db_run,
             commands::update_run_description,
+            commands::update_run_date,
             commands::delete_db_run,
             commands::reset_image,
             commands::initial_path,

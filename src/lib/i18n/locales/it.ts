@@ -69,6 +69,8 @@ const it: Messages = {
   "print.generatedBy": "Generato da FLA Dynoview",
   "crop.trim": "Ritaglia",
   "crop.reset": "Ripristina",
+  "app.runDate": "Data",
+  "app.dateNow": "Ora",
 };
 
 export default it;

@@ -83,6 +83,8 @@ const nl: Messages = {
   "print.generatedBy": "Gegenereerd door FLA Dynoview",
   "crop.trim": "Bijsnijden",
   "crop.reset": "Herstel",
+  "app.runDate": "Datum",
+  "app.dateNow": "Nu",
 };
 
 export default nl;

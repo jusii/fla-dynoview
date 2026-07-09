@@ -140,6 +140,44 @@ pub fn update_description(db: &Path, id: &str, description: &str) -> Result<(), 
     save_index(db, &idx)
 }
 
+/// Change a run's date, re-filing its record (and `.erg` sidecar) into the
+/// date-organised folder and updating the index. `new_date` is `YYYY-MM-DD`.
+pub fn update_date(db: &Path, id: &str, new_date: &str) -> Result<(), CommandError> {
+    let mut idx = load_index(db)?;
+    let pos = idx
+        .iter()
+        .position(|e| e.id == id)
+        .ok_or_else(|| CommandError::Other(format!("run not in library: {id}")))?;
+
+    let old_json = db.join(&idx[pos].path);
+    let old_erg = old_json.with_extension("erg");
+    let mut rec: RunRecord =
+        serde_json::from_str(&fs::read_to_string(&old_json).map_err(|e| io("read record", e))?)
+            .map_err(json_err)?;
+    rec.run_date = Some(new_date.to_string());
+
+    let new_rel = record_rel(&rec);
+    let new_json = db.join(&new_rel);
+
+    if new_json != old_json {
+        if let Some(parent) = new_json.parent() {
+            fs::create_dir_all(parent).map_err(|e| io("create run dir", e))?;
+        }
+        if old_erg.exists() {
+            let new_erg = new_json.with_extension("erg");
+            fs::rename(&old_erg, &new_erg)
+                .or_else(|_| fs::copy(&old_erg, &new_erg).and_then(|_| fs::remove_file(&old_erg)))
+                .map_err(|e| io("move erg sidecar", e))?;
+        }
+        let _ = fs::remove_file(&old_json);
+    }
+
+    let json = serde_json::to_string_pretty(&rec).map_err(json_err)?;
+    fs::write(&new_json, json).map_err(|e| io("write record", e))?;
+    idx[pos] = index_row(&rec, new_rel);
+    save_index(db, &idx)
+}
+
 /// Delete a run (record + sidecar + index row).
 pub fn delete_record(db: &Path, id: &str) -> Result<(), CommandError> {
     let mut idx = load_index(db)?;
@@ -219,6 +257,12 @@ mod tests {
         update_description(&db, "bbb", "renamed").unwrap();
         assert_eq!(get_record(&db, "bbb").unwrap().description, "renamed");
         assert!(load_index(&db).unwrap().iter().any(|e| e.description == "renamed"));
+
+        // changing the date re-files the record into the new date folder
+        update_date(&db, "bbb", "2020-01-15").unwrap();
+        assert_eq!(get_record(&db, "bbb").unwrap().run_date.as_deref(), Some("2020-01-15"));
+        assert!(db.join("runs/2020/2020-01-15/bbb.json").exists());
+        assert!(!db.join("runs/2019/2019-05-02/bbb.json").exists());
 
         // date-organised path
         assert!(db.join("runs/2021/2021-07-01/aaa.json").exists());

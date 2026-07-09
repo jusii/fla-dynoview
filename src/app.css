@@ -205,11 +205,6 @@ button:disabled {
   grid-template-columns: 1fr;
   gap: 1rem;
 }
-@media (min-width: 1150px) {
-  .charts {
-    grid-template-columns: 1fr 1fr;
-  }
-}
 .chart-card {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -438,6 +433,30 @@ button.icon {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.6rem;
+}
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+.date-row label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+.date-row input[type="date"] {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  color-scheme: dark;
+}
+.date-row button {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
 }
 
 /* Print report: hidden on screen, laid out for paper on print. */

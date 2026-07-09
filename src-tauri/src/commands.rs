@@ -255,6 +255,16 @@ pub async fn update_run_description(
     db::update_description(&db_dir(&app)?, &id, &description)
 }
 
+/// Set a run's date (`YYYY-MM-DD`); re-files it in the date-organised library.
+#[tauri::command]
+pub async fn update_run_date(
+    app: tauri::AppHandle,
+    id: String,
+    date: String,
+) -> Result<(), CommandError> {
+    db::update_date(&db_dir(&app)?, &id, &date)
+}
+
 /// Remove a run from the library.
 #[tauri::command]
 pub async fn delete_db_run(app: tauri::AppHandle, id: String) -> Result<(), CommandError> {

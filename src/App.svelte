@@ -23,14 +23,19 @@
   let toast = $state<string | null>(null);
   let showSettings = $state(false);
   let crop = $state({ start: 0, end: 1 });
+  let dateInput = $state("");
 
   function baseName(p: string): string {
     return p.split(/[\\/]/).pop() ?? p;
   }
-  // Show a run and reset the trim window to the full sweep.
+  // Show a run: reset the trim window and seed the date editor.
   function showRun(c: CurrentRun) {
     current = c;
     crop = { start: 0, end: 1 };
+    dateInput = c.date ?? "";
+  }
+  function setDateNow() {
+    dateInput = new Date().toISOString().slice(0, 10);
   }
   function fromDecoded(run: DecodedRun, title: string): CurrentRun {
     return { title, date: run.date, description: "", results: run.results, channels: run.channels, libId: null };
@@ -144,6 +149,10 @@
     busy = true; err = null;
     try {
       await api.updateRunDescription(current.libId, current.description);
+      if (dateInput && dateInput !== (current.date ?? "")) {
+        await api.updateRunDate(current.libId, dateInput);
+        current.date = dateInput;
+      }
       toast = t("toast.descSaved");
       await refreshLibrary();
     } catch (e) { err = String(e); } finally { busy = false; }
@@ -272,6 +281,11 @@
         <RunDetail {current} bind:crop />
         {#if current.libId}
           <section class="desc-editor">
+            <div class="date-row">
+              <label for="rundate">{t("app.runDate")}</label>
+              <input id="rundate" type="date" bind:value={dateInput} />
+              <button onclick={setDateNow} disabled={busy}>{t("app.dateNow")}</button>
+            </div>
             <label for="desc">{t("app.description")}</label>
             <textarea id="desc" rows="2" bind:value={current.description} placeholder={t("app.descPlaceholder")}></textarea>
             <div class="desc-actions">

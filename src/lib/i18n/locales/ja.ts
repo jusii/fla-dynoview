@@ -69,6 +69,8 @@ const ja: Messages = {
   "print.generatedBy": "FLA Dynoview により作成",
   "crop.trim": "トリミング",
   "crop.reset": "リセット",
+  "app.runDate": "日付",
+  "app.dateNow": "現在",
 };
 
 export default ja;
