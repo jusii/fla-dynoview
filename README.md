@@ -42,7 +42,7 @@ The app is localized into every language the FLA 203 supports. Install & usage:
 
 ## Install
 
-Pre-built binaries are attached to each [GitHub Release](../../releases).
+Pre-built binaries are attached to each [GitHub Release](https://github.com/jusii/fla-dynoview/releases).
 
 These builds are **unsigned**, so the OS will warn on first launch:
 

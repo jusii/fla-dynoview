@@ -5,7 +5,7 @@ Lea y archive mediciones de banco Bosch FLA 203 en un PC moderno, e imprima o ex
 ## Instalación
 
 ### Opción A — descargar una versión ya compilada
-Descargue el archivo correspondiente a su sistema desde la [página de versiones](../../releases):
+Descargue el archivo correspondiente a su sistema desde la [página de versiones](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (instalador)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) o `FLA.Dynoview_x64.dmg` (Intel)

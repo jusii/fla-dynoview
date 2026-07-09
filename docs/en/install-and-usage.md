@@ -5,7 +5,7 @@ Read and archive Bosch FLA 203 dyno runs on a modern PC, and print or export a P
 ## Install
 
 ### Option A — download a ready-made build
-Grab the file for your system from the [Releases page](../../releases):
+Grab the file for your system from the [Releases page](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (installer)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) or `FLA.Dynoview_x64.dmg` (Intel)

@@ -5,7 +5,7 @@ Lisez et archivez les passages au banc Bosch FLA 203 sur un PC moderne, puis imp
 ## Installation
 
 ### Option A — télécharger une version prête à l'emploi
-Récupérez le fichier correspondant à votre système sur la [page des versions](../../releases) :
+Récupérez le fichier correspondant à votre système sur la [page des versions](https://github.com/jusii/fla-dynoview/releases) :
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (programme d'installation)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) ou `FLA.Dynoview_x64.dmg` (Intel)

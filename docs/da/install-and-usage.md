@@ -5,7 +5,7 @@ Læs og arkivér Bosch FLA 203-dynokørsler på en moderne pc, og udskriv eller 
 ## Installation
 
 ### Mulighed A — hent en færdig build
-Hent filen til dit system fra [Releases-siden](../../releases):
+Hent filen til dit system fra [Releases-siden](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (installationsprogram)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) eller `FLA.Dynoview_x64.dmg` (Intel)

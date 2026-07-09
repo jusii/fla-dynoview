@@ -5,7 +5,7 @@ Leggi e archivia le prove al banco Bosch FLA 203 su un PC moderno, e stampa o es
 ## Installazione
 
 ### Opzione A — scarica una build pronta
-Scarica il file adatto al tuo sistema dalla [pagina Releases](../../releases):
+Scarica il file adatto al tuo sistema dalla [pagina Releases](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (programma di installazione)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) oppure `FLA.Dynoview_x64.dmg` (Intel)

@@ -5,7 +5,7 @@ Bosch FLA 203 Messläufe auf einem modernen PC lesen und archivieren sowie druck
 ## Installation
 
 ### Option A – Fertiges Build herunterladen
-Laden Sie die Datei für Ihr System von der [Releases-Seite](../../releases) herunter:
+Laden Sie die Datei für Ihr System von der [Releases-Seite](https://github.com/jusii/fla-dynoview/releases) herunter:
 
 - **Windows** – `FLA.Dynoview_x64-setup.exe` (Installer)
 - **macOS** – `FLA.Dynoview_aarch64.dmg` (Apple Silicon) oder `FLA.Dynoview_x64.dmg` (Intel)

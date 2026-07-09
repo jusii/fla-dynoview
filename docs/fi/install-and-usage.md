@@ -5,7 +5,7 @@ Lue ja arkistoi Bosch FLA 203 -dynoajot nykyaikaisella tietokoneella, ja tulosta
 ## Asennus
 
 ### Vaihtoehto A — lataa valmis versio
-Hae järjestelmääsi sopiva tiedosto [Releases-sivulta](../../releases):
+Hae järjestelmääsi sopiva tiedosto [Releases-sivulta](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (asennusohjelma)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) tai `FLA.Dynoview_x64.dmg` (Intel)

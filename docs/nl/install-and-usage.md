@@ -5,7 +5,7 @@ Lees en archiveer Bosch FLA 203 vermogensmetingen op een moderne pc, en druk ze 
 ## Installatie
 
 ### Optie A — download een kant-en-klare build
-Pak het bestand voor jouw systeem van de [Releases-pagina](../../releases):
+Pak het bestand voor jouw systeem van de [Releases-pagina](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (installatieprogramma)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) of `FLA.Dynoview_x64.dmg` (Intel)

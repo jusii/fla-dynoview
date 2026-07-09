@@ -5,7 +5,7 @@ Leia e arquive ensaios dinamométricos do Bosch FLA 203 num PC moderno, e imprim
 ## Instalação
 
 ### Opção A — transferir uma versão pronta a usar
-Obtenha o ficheiro para o seu sistema na [página de Releases](../../releases):
+Obtenha o ficheiro para o seu sistema na [página de Releases](https://github.com/jusii/fla-dynoview/releases):
 
 - **Windows** — `FLA.Dynoview_x64-setup.exe` (instalador)
 - **macOS** — `FLA.Dynoview_aarch64.dmg` (Apple Silicon) ou `FLA.Dynoview_x64.dmg` (Intel)
