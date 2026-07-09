@@ -68,6 +68,8 @@ const da: Messages = {
   "print.reportTitle": "Dynorapport",
   "print.runDate": "Kørselsdato",
   "print.generatedBy": "Genereret af FLA Dynoview",
+  "crop.trim": "Beskær",
+  "crop.reset": "Nulstil",
 };
 
 export default da;

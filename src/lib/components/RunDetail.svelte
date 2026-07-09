@@ -1,29 +1,41 @@
 <script lang="ts">
   import DynoChart from "../charts/DynoChart.svelte";
-  import { powerSeries, torqueSeries } from "../charts/series";
+  import { views } from "../charts/series";
+  import type { CropRange } from "../charts/series";
   import { t } from "../i18n";
   import * as U from "../units";
   import type { CurrentRun } from "../types";
 
-  let { current }: { current: CurrentRun } = $props();
+  let {
+    current,
+    crop = $bindable({ start: 0, end: 1 }),
+  }: { current: CurrentRun; crop?: CropRange } = $props();
 
-  const power = $derived(powerSeries(current.channels, current.results.kDin));
-  const torque = $derived(torqueSeries(current.channels, current.results.kDin));
+  const v = $derived(views(current.channels, current.results.kDin, crop));
   const r = $derived(current.results);
+  const s = $derived(v.scalars);
 
-  const f1 = (v: number | null | undefined) => (v == null ? "—" : v.toFixed(1));
-  const pw = (v: number | null | undefined) => (v == null ? "—" : U.power(v).toFixed(1));
+  const pw = (val: number | null | undefined) => (val == null ? "—" : U.power(val).toFixed(1));
+
+  function setStart(e: Event) {
+    const val = +(e.currentTarget as HTMLInputElement).value / 100;
+    crop = { start: Math.min(val, crop.end - 0.02), end: crop.end };
+  }
+  function setEnd(e: Event) {
+    const val = +(e.currentTarget as HTMLInputElement).value / 100;
+    crop = { start: crop.start, end: Math.max(val, crop.start + 0.02) };
+  }
 </script>
 
 <section class="infobox">
   <div class="info-title">{current.title} · {current.date ?? t("detail.noDate")}</div>
   <div class="info-grid">
-    <div><span>{t("abbr.pmax")}</span>{pw(r.pmaxKw)} {U.unitPower()}</div>
-    <div><span>{t("detail.atN")}</span>{r.rpmAtPmax ?? "—"} {U.unitRpm()}</div>
-    <div><span>{t("abbr.ppyora")}</span>{pw(r.ppyoraKw)} {U.unitPower()}</div>
-    <div><span>{t("abbr.phavio")}</span>{pw(r.phavioKw)} {U.unitPower()}</div>
-    <div><span>{t("abbr.mmax")}</span>{r.mmaxNm == null ? "—" : U.torque(r.mmaxNm).toFixed(1)} {U.unitTorque()}</div>
-    <div><span>{t("detail.atN")}</span>{r.rpmAtMmax ?? "—"} {U.unitRpm()}</div>
+    <div><span>{t("abbr.pmax")}</span>{pw(s.pmaxKw)} {U.unitPower()}</div>
+    <div><span>{t("detail.atN")}</span>{s.rpmAtPmax ?? "—"} {U.unitRpm()}</div>
+    <div><span>{t("abbr.ppyora")}</span>{pw(s.ppyoraKw)} {U.unitPower()}</div>
+    <div><span>{t("abbr.phavio")}</span>{pw(s.phavioKw)} {U.unitPower()}</div>
+    <div><span>{t("abbr.mmax")}</span>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()}</div>
+    <div><span>{t("detail.atN")}</span>{s.rpmAtMmax ?? "—"} {U.unitRpm()}</div>
     <div><span>{t("abbr.k")}</span>{r.kDin == null ? "—" : r.kDin.toFixed(3)}</div>
     <div><span>{t("abbr.pnim")}</span>{pw(r.pnimKw)} {U.unitPower()}</div>
     <div><span>{t("abbr.paine")}</span>{r.pressureHpa ?? "—"} {U.unitPressure()}</div>
@@ -31,19 +43,29 @@
   </div>
 </section>
 
+{#if v.power.length}
+  <div class="crop-bar">
+    <span class="crop-label">{t("crop.trim")}</span>
+    <input type="range" min="0" max="98" value={Math.round(crop.start * 100)} oninput={setStart} aria-label="{t('crop.trim')} start" />
+    <input type="range" min="2" max="100" value={Math.round(crop.end * 100)} oninput={setEnd} aria-label="{t('crop.trim')} end" />
+    <span class="crop-pct">{Math.round(crop.start * 100)}–{Math.round(crop.end * 100)}%</span>
+    <button onclick={() => (crop = { start: 0, end: 1 })}>{t("crop.reset")}</button>
+  </div>
+{/if}
+
 <section class="charts">
   <div class="chart-card">
     <h3>{t("term.engine")}</h3>
-    {#if power.length}
-      <DynoChart series={power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} />
+    {#if v.power.length}
+      <DynoChart series={v.power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} />
     {:else}
       <p class="muted">{t("detail.noPower")}</p>
     {/if}
   </div>
   <div class="chart-card">
     <h3>{t("term.torque")}</h3>
-    {#if torque.length}
-      <DynoChart series={torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} />
+    {#if v.torque.length}
+      <DynoChart series={v.torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} />
     {:else}
       <p class="muted">{t("detail.noTorque")}</p>
     {/if}

@@ -23,9 +23,15 @@
   let err = $state<string | null>(null);
   let toast = $state<string | null>(null);
   let showSettings = $state(false);
+  let crop = $state({ start: 0, end: 1 });
 
   function baseName(p: string): string {
     return p.split(/[\\/]/).pop() ?? p;
+  }
+  // Show a run and reset the trim window to the full sweep.
+  function showRun(c: CurrentRun) {
+    current = c;
+    crop = { start: 0, end: 1 };
   }
   function fromDecoded(run: DecodedRun, title: string): CurrentRun {
     return { title, date: run.date, description: "", results: run.results, channels: run.channels, libId: null };
@@ -60,7 +66,7 @@
     if (typeof path !== "string") return;
     busy = true;
     try {
-      current = fromDecoded(await api.openErgFile(path), baseName(path));
+      showRun(fromDecoded(await api.openErgFile(path), baseName(path)));
       selectedKey = path;
     } catch (e) { err = String(e); } finally { busy = false; }
   }
@@ -70,7 +76,7 @@
     selectedKey = r.path;
     busy = true; err = null;
     try {
-      current = fromDecoded(await api.readErgFromImage(image.imagePath, r.path), r.name);
+      showRun(fromDecoded(await api.readErgFromImage(image.imagePath, r.path), r.name));
     } catch (e) { err = String(e); current = null; } finally { busy = false; }
   }
 
@@ -78,7 +84,7 @@
     selectedKey = entry.id;
     busy = true; err = null;
     try {
-      current = fromRecord(await api.getDbRun(entry.id));
+      showRun(fromRecord(await api.getDbRun(entry.id)));
     } catch (e) { err = String(e); current = null; } finally { busy = false; }
   }
 
@@ -175,7 +181,7 @@
       if (!p) return;
       busy = true;
       if (p.toLowerCase().endsWith(".erg")) {
-        current = fromDecoded(await api.openErgFile(p), baseName(p));
+        showRun(fromDecoded(await api.openErgFile(p), baseName(p)));
       } else {
         image = await api.openImage(p);
         const first = image.runs.find((r) => !r.deleted) ?? image.runs[0];
@@ -265,7 +271,7 @@
 
     <main class="content">
       {#if current}
-        <RunDetail {current} />
+        <RunDetail {current} bind:crop />
         {#if current.libId}
           <section class="desc-editor">
             <label for="desc">{t("app.description")}</label>
@@ -317,5 +323,5 @@
 {/if}
 
 {#if current}
-  <PrintReport shopName={image?.shopName ?? ""} {current} />
+  <PrintReport shopName={image?.shopName ?? ""} {current} {crop} />
 {/if}

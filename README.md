@@ -7,6 +7,8 @@ floppy on a modern PC so you can **view, archive, and print/PDF** your dyno runs
 
 > Not affiliated with or endorsed by Robert Bosch GmbH. "Bosch" and "FLA" are
 > used only to describe hardware compatibility.
+>
+> Parts of this project were developed with the assistance of AI coding tools.
 
 ## Install & usage guides
 

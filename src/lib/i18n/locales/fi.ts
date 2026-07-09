@@ -67,6 +67,8 @@ const fi: Messages = {
   "print.reportTitle": "Dynoraportti",
   "print.runDate": "Ajon päivämäärä",
   "print.generatedBy": "Luonut FLA Dynoview",
+  "crop.trim": "Rajaa",
+  "crop.reset": "Palauta",
 };
 
 export default fi;

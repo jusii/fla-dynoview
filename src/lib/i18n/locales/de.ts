@@ -81,6 +81,8 @@ const de: Messages = {
   "print.reportTitle": "Prüfstandsbericht",
   "print.runDate": "Messdatum",
   "print.generatedBy": "Erstellt mit FLA Dynoview",
+  "crop.trim": "Zuschneiden",
+  "crop.reset": "Zurücksetzen",
 };
 
 export default de;

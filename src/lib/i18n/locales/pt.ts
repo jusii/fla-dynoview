@@ -67,6 +67,8 @@ const pt: Messages = {
   "print.reportTitle": "Relatório do dinamómetro",
   "print.runDate": "Data do ensaio",
   "print.generatedBy": "Gerado por FLA Dynoview",
+  "crop.trim": "Recortar",
+  "crop.reset": "Redefinir",
 };
 
 export default pt;

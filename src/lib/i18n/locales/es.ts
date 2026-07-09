@@ -81,6 +81,8 @@ const es: Messages = {
   "print.reportTitle": "Informe de banco de potencia",
   "print.runDate": "Fecha de medición",
   "print.generatedBy": "Generado por FLA Dynoview",
+  "crop.trim": "Recortar",
+  "crop.reset": "Restablecer",
 };
 
 export default es;

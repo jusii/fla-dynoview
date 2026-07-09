@@ -67,6 +67,8 @@ const ja: Messages = {
   "print.reportTitle": "ダイナモレポート",
   "print.runDate": "測定日",
   "print.generatedBy": "FLA Dynoview により作成",
+  "crop.trim": "トリミング",
+  "crop.reset": "リセット",
 };
 
 export default ja;

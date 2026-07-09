@@ -224,6 +224,38 @@ button:disabled {
 .muted {
   color: var(--muted);
 }
+
+/* Trim / crop bar */
+.crop-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+.crop-bar input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent-2);
+  min-width: 60px;
+}
+.crop-label {
+  color: var(--muted);
+}
+.crop-pct {
+  font-family: ui-monospace, monospace;
+  color: var(--accent);
+  min-width: 70px;
+  text-align: right;
+}
+.crop-bar button {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+}
+
 code {
   font-family: ui-monospace, monospace;
   font-size: 0.85em;

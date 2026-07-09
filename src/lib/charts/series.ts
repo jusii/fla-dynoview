@@ -43,19 +43,89 @@ export function physical(ch: ChannelsDto, kDin: number | null): Physical {
   return { rpm, wheelKw, lossKw, engineKw, torqueNm };
 }
 
-// Power/torque values are converted to the active unit system for display.
-export function powerSeries(ch: ChannelsDto, kDin: number | null): Series[] {
-  const p = physical(ch, kDin);
-  return [
-    { values: p.engineKw.map(toPower), color: MAGENTA, label: t("term.engine") },
-    { values: p.wheelKw.map(toPower), color: CYAN, label: t("term.wheel") },
-    { values: p.lossKw.map(toPower), color: GREEN, label: t("term.loss") },
-  ].filter((s) => s.values.length);
+/// A trim window over the sweep, as fractions 0..1.
+export interface CropRange {
+  start: number;
+  end: number;
 }
 
-export function torqueSeries(ch: ChannelsDto, kDin: number | null): Series[] {
+/// Peak scalars (kW / Nm), computed over the visible (cropped) window.
+export interface CropScalars {
+  pmaxKw: number | null;
+  rpmAtPmax: number | null;
+  ppyoraKw: number | null;
+  phavioKw: number | null;
+  mmaxNm: number | null;
+  rpmAtMmax: number | null;
+}
+
+export interface Views {
+  power: Series[];
+  torque: Series[];
+  scalars: CropScalars;
+}
+
+function argmax(a: number[]): number {
+  let bi = 0;
+  let bv = -Infinity;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] > bv) {
+      bv = a[i];
+      bi = i;
+    }
+  }
+  return bi;
+}
+
+/// Build the display series + recomputed peak scalars for the (optionally
+/// cropped) run. Values are converted to the active unit system.
+export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): Views {
   const p = physical(ch, kDin);
-  return [
-    { values: p.torqueNm.map(toTorque), color: ORANGE, label: t("term.torque") },
+  const n = p.engineKw.length;
+  let a = 0;
+  let b = n;
+  if (crop) {
+    a = Math.max(0, Math.floor(crop.start * n));
+    b = Math.min(n, Math.ceil(crop.end * n));
+    if (a >= b) {
+      a = 0;
+      b = n;
+    }
+  }
+  const eng = p.engineKw.slice(a, b);
+  const whl = p.wheelKw.slice(a, b);
+  const loss = p.lossKw.slice(a, b);
+  const rpm = p.rpm.slice(a, b);
+  const tq = p.torqueNm.slice(a, b);
+
+  const power: Series[] = [
+    { values: eng.map(toPower), color: MAGENTA, label: t("term.engine") },
+    { values: whl.map(toPower), color: CYAN, label: t("term.wheel") },
+    { values: loss.map(toPower), color: GREEN, label: t("term.loss") },
   ].filter((s) => s.values.length);
+  const torque: Series[] = [
+    { values: tq.map(toTorque), color: ORANGE, label: t("term.torque") },
+  ].filter((s) => s.values.length);
+
+  let scalars: CropScalars = {
+    pmaxKw: null,
+    rpmAtPmax: null,
+    ppyoraKw: null,
+    phavioKw: null,
+    mmaxNm: null,
+    rpmAtMmax: null,
+  };
+  if (eng.length) {
+    const pi = argmax(eng);
+    const mi = argmax(tq);
+    scalars = {
+      pmaxKw: eng[pi],
+      rpmAtPmax: rpm[pi],
+      ppyoraKw: Math.max(...whl),
+      phavioKw: -loss[pi],
+      mmaxNm: tq[mi],
+      rpmAtMmax: rpm[mi],
+    };
+  }
+  return { power, torque, scalars };
 }

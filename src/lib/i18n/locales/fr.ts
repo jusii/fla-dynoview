@@ -82,6 +82,8 @@ const fr: Messages = {
   "print.reportTitle": "Rapport dynamométrique",
   "print.runDate": "Date du passage",
   "print.generatedBy": "Généré par FLA Dynoview",
+  "crop.trim": "Rogner",
+  "crop.reset": "Réinit.",
 };
 
 export default fr;

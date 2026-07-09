@@ -67,6 +67,8 @@ const it: Messages = {
   "print.reportTitle": "Rapporto banco prova",
   "print.runDate": "Data della prova",
   "print.generatedBy": "Generato da FLA Dynoview",
+  "crop.trim": "Ritaglia",
+  "crop.reset": "Ripristina",
 };
 
 export default it;

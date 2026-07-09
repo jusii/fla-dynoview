@@ -81,6 +81,8 @@ const nl: Messages = {
   "print.reportTitle": "Vermogensrapport",
   "print.runDate": "Meetdatum",
   "print.generatedBy": "Gegenereerd door FLA Dynoview",
+  "crop.trim": "Bijsnijden",
+  "crop.reset": "Herstel",
 };
 
 export default nl;

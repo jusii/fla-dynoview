@@ -1,16 +1,21 @@
 <script lang="ts">
   import DynoChart from "../charts/DynoChart.svelte";
-  import { powerSeries, torqueSeries } from "../charts/series";
+  import { views } from "../charts/series";
+  import type { CropRange } from "../charts/series";
   import { t } from "../i18n";
   import * as U from "../units";
   import type { CurrentRun } from "../types";
 
-  let { shopName = "", current }: { shopName?: string; current: CurrentRun } = $props();
+  let {
+    shopName = "",
+    current,
+    crop,
+  }: { shopName?: string; current: CurrentRun; crop?: CropRange } = $props();
 
-  const power = $derived(powerSeries(current.channels, current.results.kDin));
-  const torque = $derived(torqueSeries(current.channels, current.results.kDin));
+  const v = $derived(views(current.channels, current.results.kDin, crop));
   const r = $derived(current.results);
-  const pw = (v: number | null | undefined) => (v == null ? "—" : U.power(v).toFixed(1));
+  const s = $derived(v.scalars);
+  const pw = (val: number | null | undefined) => (val == null ? "—" : U.power(val).toFixed(1));
 </script>
 
 <!-- Hidden on screen; shown by the @media print rules in app.css. -->
@@ -31,15 +36,15 @@
     <tbody>
       <tr>
         <th>{t("abbr.pmax")} ({t("term.engine")})</th>
-        <td>{pw(r.pmaxKw)} {U.unitPower()} @ {r.rpmAtPmax ?? "—"} {U.unitRpm()}</td>
+        <td>{pw(s.pmaxKw)} {U.unitPower()} @ {s.rpmAtPmax ?? "—"} {U.unitRpm()}</td>
         <th>{t("abbr.mmax")} ({t("term.torque")})</th>
-        <td>{r.mmaxNm == null ? "—" : U.torque(r.mmaxNm).toFixed(1)} {U.unitTorque()} @ {r.rpmAtMmax ?? "—"} {U.unitRpm()}</td>
+        <td>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()} @ {s.rpmAtMmax ?? "—"} {U.unitRpm()}</td>
       </tr>
       <tr>
         <th>{t("abbr.ppyora")} ({t("term.wheel")})</th>
-        <td>{pw(r.ppyoraKw)} {U.unitPower()}</td>
+        <td>{pw(s.ppyoraKw)} {U.unitPower()}</td>
         <th>{t("abbr.phavio")} ({t("term.loss")})</th>
-        <td>{pw(r.phavioKw)} {U.unitPower()}</td>
+        <td>{pw(s.phavioKw)} {U.unitPower()}</td>
       </tr>
       <tr>
         <th>{t("abbr.k")}</th>
@@ -58,11 +63,11 @@
 
   <div class="chart-block">
     <h4>{t("term.engine")} [{U.unitPower()}]</h4>
-    {#if power.length}<DynoChart series={power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
+    {#if v.power.length}<DynoChart series={v.power} yLabel={U.unitPower()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
   </div>
   <div class="chart-block">
     <h4>{t("term.torque")} [{U.unitTorque()}]</h4>
-    {#if torque.length}<DynoChart series={torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
+    {#if v.torque.length}<DynoChart series={v.torque} yLabel={U.unitTorque()} xLabel={t("chart.sweep")} width={720} height={340} />{/if}
   </div>
 
   <footer class="pr-foot">{t("print.generatedBy")}</footer>
