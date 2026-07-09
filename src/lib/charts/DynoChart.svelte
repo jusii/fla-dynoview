@@ -82,7 +82,7 @@
         <path d={genL(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.8" />
       {/each}
       {#each rightSeries as s (s.label)}
-        <path d={genR(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.8" stroke-dasharray="5 3" />
+        <path d={genR(s.values) ?? ""} fill="none" stroke={s.color} stroke-width="1.8" />
       {/each}
 
       <text class="axis-label" x={-margin.left + 4} y="-6">{leftLabel}</text>

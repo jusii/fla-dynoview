@@ -3,11 +3,9 @@ import type { Series } from "./chart-types";
 import { t } from "../i18n";
 import { power as toPower, torque as toTorque } from "../units";
 
-// Bosch-screen-inspired curve colours.
-export const MAGENTA = "#d94fd9";
-export const GREEN = "#35d43a";
-export const ORANGE = "#ff7a4a";
-export const CYAN = "#49c7ff";
+// Curve colours: power = green, torque = red (dotted, drawn by DynoChart).
+export const POWER_GREEN = "#35d43a";
+export const TORQUE_RED = "#ff4d4d";
 
 const TORQUE_CONST = 9549.296; // 60000 / (2π)
 
@@ -118,11 +116,11 @@ export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): V
   const rpm = p.rpm.slice(a, b);
   const tq = p.torqueNm.slice(a, b);
 
-  // The classic dyno chart: two curves only — power (left) and torque (right).
-  // Wheel power / loss are still surfaced as scalars in the info box.
+  // The classic dyno chart: two curves only — power (solid green, left) and
+  // torque (dotted red, right). Wheel power / loss stay as info-box scalars.
   const all: Series[] = [
-    { values: eng.map(toPower), color: MAGENTA, label: t("term.engine"), axis: "left" },
-    { values: tq.map(toTorque), color: ORANGE, label: t("term.torque"), axis: "right" },
+    { values: eng.map(toPower), color: POWER_GREEN, label: t("term.engine"), axis: "left" },
+    { values: tq.map(toTorque), color: TORQUE_RED, label: t("term.torque"), axis: "right" },
   ];
   const series = all.filter((s) => s.values.length);
 
