@@ -63,7 +63,7 @@
 
   <div class="chart-block">
     <h4>{t("term.engine")} [{U.unitPower()}] / {t("term.torque")} [{U.unitTorque()}]</h4>
-    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={760} height={380} />{/if}
+    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={1000} height={440} />{/if}
   </div>
 
   <footer class="pr-foot">{t("print.generatedBy")}</footer>

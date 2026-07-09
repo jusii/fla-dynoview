@@ -465,8 +465,13 @@ button.icon {
 }
 @media print {
   @page {
-    size: A4;
-    margin: 12mm 14mm;
+    size: A4 landscape;
+    margin: 10mm 12mm;
+  }
+  /* Kill the app's dark background so empty page area prints white (no black box). */
+  html,
+  body {
+    background: #fff !important;
   }
   .app,
   .modal-backdrop {
@@ -475,7 +480,9 @@ button.icon {
   #print-report {
     display: block !important;
   }
-  * {
+  /* Force exact colours only inside the report (charts/table), not the page bg. */
+  #print-report,
+  #print-report * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
