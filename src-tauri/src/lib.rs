@@ -32,6 +32,7 @@ pub fn run() {
             commands::reset_image,
             commands::initial_path,
             commands::app_paths,
+            commands::open_data_folder,
             commands::get_settings,
             commands::set_settings,
         ])

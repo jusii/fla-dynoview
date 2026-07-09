@@ -306,6 +306,18 @@ pub fn app_paths(app: tauri::AppHandle) -> Result<Paths, CommandError> {
     })
 }
 
+/// Open the app's data folder in the OS file manager. Done in the backend so it
+/// isn't subject to the frontend opener ACL/scope.
+#[tauri::command]
+pub fn open_data_folder(app: tauri::AppHandle) -> Result<(), CommandError> {
+    use tauri_plugin_opener::OpenerExt;
+    let root = app_root(&app)?;
+    let _ = std::fs::create_dir_all(&root); // so the folder exists to open
+    app.opener()
+        .open_path(root.to_string_lossy().to_string(), None::<&str>)
+        .map_err(|e| CommandError::Other(e.to_string()))
+}
+
 /// Load persisted settings (language, unit system).
 #[tauri::command]
 pub fn get_settings(app: tauri::AppHandle) -> Result<crate::settings::Settings, CommandError> {

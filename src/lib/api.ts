@@ -56,6 +56,8 @@ export const resetImage = (imagePath: string, confirm: boolean) =>
 // --- misc ---
 export const appPaths = () => invoke<Paths>("app_paths");
 
+export const openDataFolder = () => invoke<void>("open_data_folder");
+
 export const initialPath = () => invoke<string | null>("initial_path");
 
 // --- settings ---

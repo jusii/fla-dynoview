@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { ask, open } from "@tauri-apps/plugin-dialog";
-  import { openPath } from "@tauri-apps/plugin-opener";
   import * as api from "./lib/api";
   import type { CurrentRun, DecodedRun, ImageSummary, RunEntry, RunIndexEntry, RunRecord } from "./lib/types";
   import RunDetail from "./lib/components/RunDetail.svelte";
@@ -168,8 +167,7 @@
 
   async function revealFolder() {
     try {
-      const p = await api.appPaths();
-      await openPath(p.root);
+      await api.openDataFolder();
     } catch (e) { err = String(e); }
   }
 
