@@ -5,6 +5,7 @@
   import type { CurrentRun, DecodedRun, ImageSummary, RunEntry, RunIndexEntry, RunRecord } from "./lib/types";
   import RunDetail from "./lib/components/RunDetail.svelte";
   import PrintReport from "./lib/components/PrintReport.svelte";
+  import { autoCrop } from "./lib/charts/series";
   import { t, LOCALES } from "./lib/i18n";
   import type { Locale } from "./lib/i18n";
   import { lang, unitSys, setLanguage, setUnitSystem } from "./lib/settings.svelte";
@@ -28,10 +29,10 @@
   function baseName(p: string): string {
     return p.split(/[\\/]/).pop() ?? p;
   }
-  // Show a run: reset the trim window and seed the date editor.
+  // Show a run: default the trim to the detected pull, seed the date editor.
   function showRun(c: CurrentRun) {
     current = c;
-    crop = { start: 0, end: 1 };
+    crop = autoCrop(c.channels, c.results.kDin);
     dateInput = c.date ?? "";
   }
   function setDateNow() {

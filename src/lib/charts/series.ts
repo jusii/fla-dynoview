@@ -67,6 +67,23 @@ export interface Views {
   scalars: CropScalars;
 }
 
+/// Detect the "pull": the final monotonic rpm climb up to peak rpm. Returns the
+/// crop that isolates it, so the chart opens on the clean acceleration sweep
+/// (the FLA's launch/idle region has non-monotonic rpm that plots messily).
+/// Returns the full range if the run is already clean or too short.
+export function autoCrop(ch: ChannelsDto, kDin: number | null): CropRange {
+  const { rpm } = physical(ch, kDin);
+  const n = rpm.length;
+  if (n < 6) return { start: 0, end: 1 };
+  let peak = 0;
+  for (let i = 1; i < n; i++) if (rpm[i] > rpm[peak]) peak = i;
+  let start = peak;
+  while (start > 0 && rpm[start - 1] <= rpm[start]) start--;
+  const end = Math.min(n, peak + 1);
+  if (end - start < 3) return { start: 0, end: 1 };
+  return { start: start / n, end: end / n };
+}
+
 function argmax(a: number[]): number {
   let bi = 0;
   let bv = -Infinity;
@@ -101,10 +118,10 @@ export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): V
   const rpm = p.rpm.slice(a, b);
   const tq = p.torqueNm.slice(a, b);
 
+  // The classic dyno chart: two curves only — power (left) and torque (right).
+  // Wheel power / loss are still surfaced as scalars in the info box.
   const all: Series[] = [
     { values: eng.map(toPower), color: MAGENTA, label: t("term.engine"), axis: "left" },
-    { values: whl.map(toPower), color: CYAN, label: t("term.wheel"), axis: "left" },
-    { values: loss.map(toPower), color: GREEN, label: t("term.loss"), axis: "left" },
     { values: tq.map(toTorque), color: ORANGE, label: t("term.torque"), axis: "right" },
   ];
   const series = all.filter((s) => s.values.length);
