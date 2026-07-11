@@ -94,7 +94,7 @@
   <div class="legend">
     {#each series as s (s.label)}
       <span class="legend-item">
-        <span class="swatch" style="background:{s.color}"></span>{s.label}{#if s.axis === "right"} ⟶{/if}
+        <span class="swatch" style="background:{s.color}"></span>{s.label}
       </span>
     {/each}
   </div>

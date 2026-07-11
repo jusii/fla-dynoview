@@ -7,10 +7,9 @@
   import type { CurrentRun } from "../types";
 
   let {
-    shopName = "",
     current,
     crop,
-  }: { shopName?: string; current: CurrentRun; crop?: CropRange } = $props();
+  }: { current: CurrentRun; crop?: CropRange } = $props();
 
   const v = $derived(views(current.channels, current.results.kDin, crop));
   const r = $derived(current.results);
@@ -21,7 +20,7 @@
 <!-- Hidden on screen; shown by the @media print rules in app.css. -->
 <div id="print-report">
   <header class="pr-head">
-    <div class="pr-shop">{shopName || t("print.reportTitle")}</div>
+    <div class="pr-shop">{current.shopName || t("print.reportTitle")}</div>
     <div class="pr-meta">
       <span>{current.title}</span>
       <span>{current.date ?? ""}</span>
@@ -49,14 +48,12 @@
       <tr>
         <th>{t("abbr.k")}</th>
         <td>{r.kDin == null ? "—" : r.kDin.toFixed(3)}</td>
-        <th>{t("abbr.pnim")}</th>
-        <td>{pw(r.pnimKw)} {U.unitPower()}</td>
-      </tr>
-      <tr>
         <th>{t("abbr.paine")} / {t("abbr.lamp")}</th>
         <td>{r.pressureHpa ?? "—"} {U.unitPressure()} / {r.tempC == null ? "—" : U.temp(r.tempC).toFixed(0)} {U.unitTemp()}</td>
+      </tr>
+      <tr>
         <th>{t("print.runDate")}</th>
-        <td>{current.date ?? "—"}</td>
+        <td colspan="3">{current.date ?? "—"}</td>
       </tr>
     </tbody>
   </table>

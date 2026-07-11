@@ -51,6 +51,7 @@ fn build_record(
     source_image: Option<String>,
     source_entry: Option<String>,
     was_deleted: bool,
+    shop_name: Option<String>,
 ) -> Result<RunRecord, CommandError> {
     let dto = decode_dto(bytes)?;
     Ok(RunRecord {
@@ -60,6 +61,7 @@ fn build_record(
         source_image,
         source_entry,
         was_deleted_entry: was_deleted,
+        shop_name,
         run_date: dto.date.clone(),
         imported_at: chrono::Utc::now().to_rfc3339(),
         description: String::new(),
@@ -162,12 +164,24 @@ fn do_import(
     entries: &[DirEntry],
     overwrite: bool,
 ) -> ImportReport {
+    // Shop/owner name from the disk's FLA.CFG — stored with every run so the
+    // printout keeps it even when the disk isn't open later.
+    let shop_name = fs
+        .find("FLA/FLA.CFG")
+        .map(|e| parse_cfg(&fs.read_entry(&e)).name)
+        .filter(|n| !n.is_empty());
     let mut report = ImportReport::default();
     for ent in entries {
         let bytes = fs.read_entry(ent);
         let label = ent.name.clone();
-        match build_record(&bytes, Some(img_name.to_string()), Some(ent.name.clone()), ent.deleted)
-            .and_then(|rec| db::import_one(db, &bytes, &rec, overwrite))
+        match build_record(
+            &bytes,
+            Some(img_name.to_string()),
+            Some(ent.name.clone()),
+            ent.deleted,
+            shop_name.clone(),
+        )
+        .and_then(|rec| db::import_one(db, &bytes, &rec, overwrite))
         {
             Ok(db::Outcome::Added) => report.added.push(label),
             Ok(db::Outcome::Skipped) => report.skipped.push(label),

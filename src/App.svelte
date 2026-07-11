@@ -38,8 +38,8 @@
   function setDateNow() {
     dateInput = new Date().toISOString().slice(0, 10);
   }
-  function fromDecoded(run: DecodedRun, title: string): CurrentRun {
-    return { title, date: run.date, description: "", results: run.results, channels: run.channels, libId: null };
+  function fromDecoded(run: DecodedRun, title: string, shopName: string | null): CurrentRun {
+    return { title, date: run.date, description: "", results: run.results, channels: run.channels, shopName, libId: null };
   }
   function fromRecord(rec: RunRecord): CurrentRun {
     return {
@@ -48,6 +48,7 @@
       description: rec.description,
       results: rec.results,
       channels: rec.channels,
+      shopName: rec.shopName,
       libId: rec.id,
     };
   }
@@ -71,7 +72,7 @@
     if (typeof path !== "string") return;
     busy = true;
     try {
-      showRun(fromDecoded(await api.openErgFile(path), baseName(path)));
+      showRun(fromDecoded(await api.openErgFile(path), baseName(path), null));
       selectedKey = path;
     } catch (e) { err = String(e); } finally { busy = false; }
   }
@@ -81,7 +82,7 @@
     selectedKey = r.path;
     busy = true; err = null;
     try {
-      showRun(fromDecoded(await api.readErgFromImage(image.imagePath, r.path), r.name));
+      showRun(fromDecoded(await api.readErgFromImage(image.imagePath, r.path), r.name, image.shopName));
     } catch (e) { err = String(e); current = null; } finally { busy = false; }
   }
 
@@ -189,7 +190,7 @@
       if (!p) return;
       busy = true;
       if (p.toLowerCase().endsWith(".erg")) {
-        showRun(fromDecoded(await api.openErgFile(p), baseName(p)));
+        showRun(fromDecoded(await api.openErgFile(p), baseName(p), null));
       } else {
         image = await api.openImage(p);
         const first = image.runs.find((r) => !r.deleted) ?? image.runs[0];
@@ -215,7 +216,9 @@
       <button class="primary" onclick={printReport}>{t("app.printPdf")}</button>
     {/if}
     <button class="icon" title={t("app.settings")} onclick={() => (showSettings = true)}>⚙</button>
-    {#if image && mode === "browse"}
+    {#if current?.shopName}
+      <div class="shop">🏁 {current.shopName}</div>
+    {:else if image && mode === "browse"}
       <div class="shop">🏁 {image.shopName || t("app.shopFallback")}</div>
     {/if}
   </header>
@@ -288,7 +291,7 @@
               <button onclick={setDateNow} disabled={busy}>{t("app.dateNow")}</button>
             </div>
             <label for="desc">{t("app.description")}</label>
-            <textarea id="desc" rows="2" bind:value={current.description} placeholder={t("app.descPlaceholder")}></textarea>
+            <textarea id="desc" rows="2" bind:value={current.description} placeholder={t("app.descPlaceholder")} onblur={saveDescription}></textarea>
             <div class="desc-actions">
               <button class="primary" onclick={saveDescription} disabled={busy}>{t("app.save")}</button>
               <button class="danger" onclick={deleteCurrent} disabled={busy}>{t("app.deleteFromLibrary")}</button>
@@ -336,5 +339,5 @@
 {/if}
 
 {#if current}
-  <PrintReport shopName={image?.shopName ?? ""} {current} {crop} />
+  <PrintReport {current} {crop} />
 {/if}

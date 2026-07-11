@@ -98,8 +98,26 @@ pub fn import_one(
         if !overwrite {
             return Ok(Outcome::Skipped);
         }
-        let rel = write_record(db, rec, erg)?;
-        idx[pos] = index_row(rec, rel);
+        // Refresh the decoded data but keep the user's metadata: description, an
+        // edited date, and the shop name if the new record doesn't carry one.
+        let mut merged = rec.clone();
+        if let Ok(old) = fs::read_to_string(db.join(&idx[pos].path))
+            .ok()
+            .ok_or(())
+            .and_then(|s| serde_json::from_str::<RunRecord>(&s).map_err(|_| ()))
+        {
+            if !old.description.is_empty() {
+                merged.description = old.description;
+            }
+            if old.run_date.is_some() {
+                merged.run_date = old.run_date;
+            }
+            if merged.shop_name.is_none() {
+                merged.shop_name = old.shop_name;
+            }
+        }
+        let rel = write_record(db, &merged, erg)?;
+        idx[pos] = index_row(&merged, rel);
         save_index(db, &idx)?;
         Ok(Outcome::Overwritten)
     } else {
@@ -205,6 +223,7 @@ mod tests {
             source_image: Some("DSKA0000.img".into()),
             source_entry: Some("1.ERG".into()),
             was_deleted_entry: false,
+            shop_name: Some("Pellinen Motorsport".into()),
             run_date: Some(date.to_string()),
             imported_at: "2026-07-09T10:00:00Z".into(),
             description: desc.to_string(),
@@ -242,11 +261,16 @@ mod tests {
         assert!(matches!(import_one(&db, b"ERGDATA", &r, false).unwrap(), Outcome::Skipped));
         assert_eq!(load_index(&db).unwrap().len(), 1);
 
-        // overwrite updates in place
-        let r2 = rec("aaa", "2021-07-01", "updated");
-        assert!(matches!(import_one(&db, b"ERGDATA", &r2, true).unwrap(), Outcome::Overwritten));
+        // Re-import with overwrite refreshes data but keeps the user's metadata.
+        // A real re-import's freshly-built record has an empty description.
+        update_description(&db, "aaa", "customer note").unwrap();
+        let mut reimport = rec("aaa", "2021-07-01", "");
+        reimport.shop_name = None; // new record with no shop name
+        assert!(matches!(import_one(&db, b"ERGDATA", &reimport, true).unwrap(), Outcome::Overwritten));
         assert_eq!(load_index(&db).unwrap().len(), 1);
-        assert_eq!(get_record(&db, "aaa").unwrap().description, "updated");
+        let a = get_record(&db, "aaa").unwrap();
+        assert_eq!(a.description, "customer note", "description preserved on overwrite");
+        assert_eq!(a.shop_name.as_deref(), Some("Pellinen Motorsport"), "shop preserved when new empty");
 
         // a different run is added alongside
         let r3 = rec("bbb", "2019-05-02", "other");
@@ -263,6 +287,14 @@ mod tests {
         assert_eq!(get_record(&db, "bbb").unwrap().run_date.as_deref(), Some("2020-01-15"));
         assert!(db.join("runs/2020/2020-01-15/bbb.json").exists());
         assert!(!db.join("runs/2019/2019-05-02/bbb.json").exists());
+
+        // re-importing bbb (decoded date 2019) keeps the edited date + description
+        let reb = rec("bbb", "2019-05-02", "");
+        assert!(matches!(import_one(&db, b"ZZ", &reb, true).unwrap(), Outcome::Overwritten));
+        let b = get_record(&db, "bbb").unwrap();
+        assert_eq!(b.run_date.as_deref(), Some("2020-01-15"), "edited date preserved on overwrite");
+        assert_eq!(b.description, "renamed", "description preserved on overwrite");
+        assert!(db.join("runs/2020/2020-01-15/bbb.json").exists());
 
         // date-organised path
         assert!(db.join("runs/2021/2021-07-01/aaa.json").exists());

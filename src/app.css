@@ -211,6 +211,12 @@ button:disabled {
   border-radius: 8px;
   padding: 0.7rem 0.8rem 0.5rem;
 }
+/* Cap the on-screen chart height so the description + Save stay above the fold
+   (the SVG keeps its aspect via preserveAspectRatio). Does not affect the print
+   report, whose chart lives in #print-report. */
+.chart-card svg {
+  max-height: 52vh;
+}
 .chart-card h3 {
   margin: 0 0 0.5rem;
   font-size: 0.95rem;

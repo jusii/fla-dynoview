@@ -69,6 +69,7 @@ export interface RunRecord {
   sourceImage: string | null;
   sourceEntry: string | null;
   wasDeletedEntry: boolean;
+  shopName: string | null;
   runDate: string | null;
   importedAt: string;
   description: string;
@@ -106,6 +107,8 @@ export interface CurrentRun {
   description: string;
   results: ResultsDto;
   channels: ChannelsDto;
+  /// Shop/owner name (from the source disk), for the toolbar + printout.
+  shopName: string | null;
   /// Library record id when this run is saved in the library, else null.
   libId: string | null;
 }

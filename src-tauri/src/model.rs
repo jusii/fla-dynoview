@@ -122,6 +122,11 @@ pub struct RunRecord {
     pub source_image: Option<String>,
     pub source_entry: Option<String>,
     pub was_deleted_entry: bool,
+    /// Shop/owner name from the source disk's FLA.CFG (kept so the printout shows
+    /// it even when viewing a library run with no disk open). Defaulted for
+    /// records written before this field existed.
+    #[serde(default)]
+    pub shop_name: Option<String>,
     pub run_date: Option<String>,
     pub imported_at: String,
     pub description: String,

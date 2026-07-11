@@ -37,7 +37,6 @@
     <div><span>{t("abbr.mmax")}</span>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()}</div>
     <div><span>{t("detail.atN")}</span>{s.rpmAtMmax ?? "—"} {U.unitRpm()}</div>
     <div><span>{t("abbr.k")}</span>{r.kDin == null ? "—" : r.kDin.toFixed(3)}</div>
-    <div><span>{t("abbr.pnim")}</span>{pw(r.pnimKw)} {U.unitPower()}</div>
     <div><span>{t("abbr.paine")}</span>{r.pressureHpa ?? "—"} {U.unitPressure()}</div>
     <div><span>{t("abbr.lamp")}</span>{r.tempC == null ? "—" : U.temp(r.tempC).toFixed(0)} {U.unitTemp()}</div>
   </div>
