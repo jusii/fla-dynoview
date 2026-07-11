@@ -85,6 +85,22 @@ const nl: Messages = {
   "crop.reset": "Herstel",
   "app.runDate": "Datum",
   "app.dateNow": "Nu",
+  "app.saveReadings": "Meetwaarden opslaan",
+  "toast.readingsSaved": "Meetwaarden opgeslagen.",
+  "app.compare": "Vergelijken ({count})",
+  "app.comparison": "Vergelijking",
+  "compare.selectHint": "Selecteer 2–4 metingen om te overlappen.",
+  "compare.checkTitle": "Aan vergelijking toevoegen",
+  "compare.close": "Vergelijking sluiten",
+  "compare.lineNote": "Doorgetrokken lijn = vermogen · streepjeslijn = koppel.",
+  "settings.fieldLabels": "Veldlabels",
+  "settings.fieldLabelsHint": "Hernoem de bijschriften die op het scherm en in afdrukken worden getoond. Laat leeg voor de standaardwaarde.",
+  "settings.resetLabels": "Labels resetten",
+  "settings.logo": "Logo afdrukken",
+  "settings.chooseLogo": "Afbeelding kiezen…",
+  "settings.removeLogo": "Logo verwijderen",
+  "settings.headerText": "Koptekst afdrukken",
+  "settings.headerHint": "Laat leeg om de werkplaatsnaam te gebruiken.",
 };
 
 export default nl;

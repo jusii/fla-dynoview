@@ -115,6 +115,14 @@ pub fn import_one(
             if merged.shop_name.is_none() {
                 merged.shop_name = old.shop_name;
             }
+            // Value overrides are user edits — a fresh re-import never sets them,
+            // so always carry the existing ones forward.
+            if merged.value_overrides.temp_c.is_none() {
+                merged.value_overrides.temp_c = old.value_overrides.temp_c;
+            }
+            if merged.value_overrides.pressure_hpa.is_none() {
+                merged.value_overrides.pressure_hpa = old.value_overrides.pressure_hpa;
+            }
         }
         let rel = write_record(db, &merged, erg)?;
         idx[pos] = index_row(&merged, rel);
@@ -156,6 +164,27 @@ pub fn update_description(db: &Path, id: &str, description: &str) -> Result<(), 
     fs::write(&full, json).map_err(|e| io("write record", e))?;
     idx[pos].description = description.to_string();
     save_index(db, &idx)
+}
+
+/// Update a run's display value overrides (temperature / pressure). Record-only;
+/// the index carries no override data.
+pub fn update_overrides(
+    db: &Path,
+    id: &str,
+    overrides: crate::model::ValueOverrides,
+) -> Result<(), CommandError> {
+    let idx = load_index(db)?;
+    let entry = idx
+        .iter()
+        .find(|e| e.id == id)
+        .ok_or_else(|| CommandError::Other(format!("run not in library: {id}")))?;
+    let full = db.join(&entry.path);
+    let mut rec: RunRecord =
+        serde_json::from_str(&fs::read_to_string(&full).map_err(|e| io("read record", e))?)
+            .map_err(json_err)?;
+    rec.value_overrides = overrides;
+    let json = serde_json::to_string_pretty(&rec).map_err(json_err)?;
+    fs::write(&full, json).map_err(|e| io("write record", e))
 }
 
 /// Change a run's date, re-filing its record (and `.erg` sidecar) into the
@@ -213,7 +242,7 @@ pub fn delete_record(db: &Path, id: &str) -> Result<(), CommandError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{ChannelsDto, ResultsDto};
+    use crate::model::{ChannelsDto, ResultsDto, ValueOverrides};
 
     fn rec(id: &str, date: &str, desc: &str) -> RunRecord {
         RunRecord {
@@ -227,6 +256,7 @@ mod tests {
             run_date: Some(date.to_string()),
             imported_at: "2026-07-09T10:00:00Z".into(),
             description: desc.to_string(),
+            value_overrides: ValueOverrides::default(),
             results: ResultsDto {
                 pnim_kw: Some(200),
                 pressure_hpa: Some(975),
@@ -295,6 +325,24 @@ mod tests {
         assert_eq!(b.run_date.as_deref(), Some("2020-01-15"), "edited date preserved on overwrite");
         assert_eq!(b.description, "renamed", "description preserved on overwrite");
         assert!(db.join("runs/2020/2020-01-15/bbb.json").exists());
+
+        // display-only value overrides persist and survive a re-import
+        update_overrides(
+            &db,
+            "bbb",
+            ValueOverrides { temp_c: Some(18), pressure_hpa: Some(1002) },
+        )
+        .unwrap();
+        let bo = get_record(&db, "bbb").unwrap();
+        assert_eq!(bo.value_overrides.temp_c, Some(18));
+        assert_eq!(bo.value_overrides.pressure_hpa, Some(1002));
+        let reb2 = rec("bbb", "2019-05-02", "");
+        assert!(matches!(import_one(&db, b"ZZ", &reb2, true).unwrap(), Outcome::Overwritten));
+        assert_eq!(
+            get_record(&db, "bbb").unwrap().value_overrides.temp_c,
+            Some(18),
+            "value overrides preserved on overwrite"
+        );
 
         // date-organised path
         assert!(db.join("runs/2021/2021-07-01/aaa.json").exists());

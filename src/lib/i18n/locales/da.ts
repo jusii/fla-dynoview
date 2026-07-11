@@ -72,6 +72,22 @@ const da: Messages = {
   "crop.reset": "Nulstil",
   "app.runDate": "Dato",
   "app.dateNow": "Nu",
+  "app.saveReadings": "Gem måleværdier",
+  "toast.readingsSaved": "Måleværdier gemt.",
+  "app.compare": "Sammenlign ({count})",
+  "app.comparison": "Sammenligning",
+  "compare.selectHint": "Vælg 2–4 kørsler til at lægge oven på hinanden.",
+  "compare.checkTitle": "Føj til sammenligning",
+  "compare.close": "Luk sammenligning",
+  "compare.lineNote": "Fuldt optrukket linje = effekt · stiplet linje = moment.",
+  "settings.fieldLabels": "Feltetiketter",
+  "settings.fieldLabelsHint": "Omdøb de tekster, der vises på skærmen og i udskrifter. Lad stå tomt for standardværdien.",
+  "settings.resetLabels": "Nulstil etiketter",
+  "settings.logo": "Udskriftslogo",
+  "settings.chooseLogo": "Vælg billede…",
+  "settings.removeLogo": "Fjern logo",
+  "settings.headerText": "Tekst i udskriftens sidehoved",
+  "settings.headerHint": "Lad stå tomt for at bruge værkstedets navn.",
 };
 
 export default da;

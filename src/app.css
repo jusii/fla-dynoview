@@ -311,7 +311,9 @@ button.icon {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 1.2rem 1.4rem;
-  width: min(420px, 92vw);
+  width: min(460px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 12px 44px rgba(0, 0, 0, 0.5);
 }
 .modal h2 {
@@ -325,7 +327,8 @@ button.icon {
   font-size: 0.82rem;
   color: var(--muted);
 }
-.modal .field select {
+.modal .field select,
+.modal .field input {
   display: block;
   width: 100%;
   margin-top: 0.3rem;
@@ -341,6 +344,125 @@ button.icon {
   justify-content: space-between;
   gap: 0.5rem;
   margin-top: 1.2rem;
+}
+
+/* Settings: field-label editor, logo, header */
+.field-group {
+  margin-bottom: 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.9rem;
+}
+.fg-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.fg-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0.25rem 0 0.5rem;
+}
+.label-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  gap: 0.3rem 0.6rem;
+  align-items: center;
+}
+.lbl-default {
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lbl-input {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  font-size: 0.82rem;
+  min-width: 0;
+}
+.button.link,
+button.link {
+  background: transparent;
+  border: none;
+  color: var(--accent-2);
+  padding: 0;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.logo-prev {
+  max-height: 40px;
+  max-width: 150px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+/* Library: comparison selection */
+.librow {
+  display: flex;
+  align-items: stretch;
+}
+.cmp-check {
+  flex: none;
+  margin: 0 0 0 0.5rem;
+  align-self: center;
+  accent-color: var(--accent-2);
+}
+.librow .runitem {
+  flex: 1;
+  min-width: 0;
+}
+.cmp-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 0.1rem 0.1rem;
+}
+
+/* Reading overrides in the description editor */
+.readings {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.readings label {
+  margin: 0;
+}
+.ovnum {
+  width: 4.2rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem;
+  font: inherit;
+  font-size: 0.82rem;
+}
+.ovunit {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-right: 0.3rem;
+}
+.readings button {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
 }
 
 /* Bars */
@@ -445,6 +567,10 @@ button.icon {
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.7rem;
+  flex-wrap: wrap;
+}
+.date-row .ovnum {
+  color-scheme: dark;
 }
 .date-row label {
   font-size: 0.8rem;

@@ -83,6 +83,25 @@ const en = {
   "crop.reset": "Reset",
   "app.runDate": "Date",
   "app.dateNow": "Now",
+  // readings override (display-only)
+  "app.saveReadings": "Save readings",
+  "toast.readingsSaved": "Readings saved.",
+  // comparison
+  "app.compare": "Compare ({count})",
+  "app.comparison": "Comparison",
+  "compare.selectHint": "Select 2–4 runs to overlay.",
+  "compare.checkTitle": "Add to comparison",
+  "compare.close": "Close comparison",
+  "compare.lineNote": "Solid line = power · dashed line = torque.",
+  // settings: field labels / logo / header
+  "settings.fieldLabels": "Field labels",
+  "settings.fieldLabelsHint": "Rename the captions shown on screen and in printouts. Leave blank for the default.",
+  "settings.resetLabels": "Reset labels",
+  "settings.logo": "Print logo",
+  "settings.chooseLogo": "Choose image…",
+  "settings.removeLogo": "Remove logo",
+  "settings.headerText": "Print header text",
+  "settings.headerHint": "Leave empty to use the shop name.",
 } as const;
 
 export default en;

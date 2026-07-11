@@ -71,6 +71,22 @@ const pt: Messages = {
   "crop.reset": "Redefinir",
   "app.runDate": "Data",
   "app.dateNow": "Agora",
+  "app.saveReadings": "Guardar valores",
+  "toast.readingsSaved": "Valores guardados.",
+  "app.compare": "Comparar ({count})",
+  "app.comparison": "Comparação",
+  "compare.selectHint": "Selecione 2 a 4 ensaios para sobrepor.",
+  "compare.checkTitle": "Adicionar à comparação",
+  "compare.close": "Fechar comparação",
+  "compare.lineNote": "Linha contínua = potência · linha tracejada = torque.",
+  "settings.fieldLabels": "Rótulos dos campos",
+  "settings.fieldLabelsHint": "Renomeie as legendas mostradas no ecrã e nas impressões. Deixe em branco para o valor predefinido.",
+  "settings.resetLabels": "Repor rótulos",
+  "settings.logo": "Logótipo de impressão",
+  "settings.chooseLogo": "Escolher imagem…",
+  "settings.removeLogo": "Remover logótipo",
+  "settings.headerText": "Texto do cabeçalho de impressão",
+  "settings.headerHint": "Deixe em branco para usar o nome da oficina.",
 };
 
 export default pt;

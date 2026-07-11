@@ -86,6 +86,22 @@ const fr: Messages = {
   "crop.reset": "Réinit.",
   "app.runDate": "Date",
   "app.dateNow": "Maint.",
+  "app.saveReadings": "Enregistrer les valeurs",
+  "toast.readingsSaved": "Valeurs enregistrées.",
+  "app.compare": "Comparer ({count})",
+  "app.comparison": "Comparaison",
+  "compare.selectHint": "Sélectionnez 2 à 4 passages à superposer.",
+  "compare.checkTitle": "Ajouter à la comparaison",
+  "compare.close": "Fermer la comparaison",
+  "compare.lineNote": "Ligne continue = puissance · ligne pointillée = couple.",
+  "settings.fieldLabels": "Libellés des champs",
+  "settings.fieldLabelsHint": "Renommez les légendes affichées à l'écran et sur les impressions. Laissez vide pour la valeur par défaut.",
+  "settings.resetLabels": "Réinitialiser les libellés",
+  "settings.logo": "Logo d'impression",
+  "settings.chooseLogo": "Choisir une image…",
+  "settings.removeLogo": "Supprimer le logo",
+  "settings.headerText": "Texte d'en-tête d'impression",
+  "settings.headerHint": "Laissez vide pour utiliser le nom de l'atelier.",
 };
 
 export default fr;

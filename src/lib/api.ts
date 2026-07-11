@@ -10,6 +10,7 @@ import type {
   RunRecord,
   Settings,
   ShopInfo,
+  ValueOverrides,
 } from "./types";
 
 // --- reading images / runs ---
@@ -48,6 +49,12 @@ export const updateRunDescription = (id: string, description: string) =>
 
 export const updateRunDate = (id: string, date: string) =>
   invoke<void>("update_run_date", { id, date });
+
+export const updateRunOverrides = (id: string, overrides: ValueOverrides) =>
+  invoke<void>("update_run_overrides", { id, overrides });
+
+export const readImageDataUri = (path: string) =>
+  invoke<string>("read_image_data_uri", { path });
 
 export const deleteDbRun = (id: string) =>
   invoke<void>("delete_db_run", { id });

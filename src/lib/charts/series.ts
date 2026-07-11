@@ -1,11 +1,15 @@
-import type { ChannelsDto } from "../types";
+import type { ChannelsDto, CurveVisibility } from "../types";
 import type { Series } from "./chart-types";
-import { t } from "../i18n";
+import { label } from "../i18n";
 import { power as toPower, torque as toTorque } from "../units";
 
-// Curve colours: power = green, torque = red (dotted, drawn by DynoChart).
-export const POWER_GREEN = "#35d43a";
-export const TORQUE_RED = "#ff4d4d";
+// Curve colours.
+export const POWER_GREEN = "#35d43a"; // engine power
+export const WHEEL_BLUE = "#4db8ff"; // wheel power
+export const LOSS_ORANGE = "#ff9d3a"; // wheel power-loss
+export const TORQUE_RED = "#ff4d4d"; // torque
+
+const ALL_CURVES: CurveVisibility = { engine: true, wheel: false, loss: false, torque: true };
 
 const TORQUE_CONST = 9549.296; // 60000 / (2π)
 
@@ -97,7 +101,12 @@ function argmax(a: number[]): number {
 /// Build the combined display series (power on the left axis, torque on the
 /// right), the rpm axis, and recomputed peak scalars for the (optionally
 /// cropped) run. Values are converted to the active unit system.
-export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): Views {
+export function views(
+  ch: ChannelsDto,
+  kDin: number | null,
+  crop?: CropRange,
+  vis: CurveVisibility = ALL_CURVES,
+): Views {
   const p = physical(ch, kDin);
   const n = p.engineKw.length;
   let a = 0;
@@ -116,12 +125,18 @@ export function views(ch: ChannelsDto, kDin: number | null, crop?: CropRange): V
   const rpm = p.rpm.slice(a, b);
   const tq = p.torqueNm.slice(a, b);
 
-  // The classic dyno chart: two curves only — power (solid green, left) and
-  // torque (dotted red, right). Wheel power / loss stay as info-box scalars.
-  const all: Series[] = [
-    { values: eng.map(toPower), color: POWER_GREEN, label: t("term.engine"), axis: "left" },
-    { values: tq.map(toTorque), color: TORQUE_RED, label: t("term.torque"), axis: "right" },
-  ];
+  // Power curves on the left axis, torque on the right. Which curves are drawn is
+  // controlled by `vis`; all channel data is computed regardless. Loss is plotted
+  // as its magnitude (drag power), matching the positive Ploss scalar.
+  const all: Series[] = [];
+  if (vis.engine)
+    all.push({ values: eng.map(toPower), color: POWER_GREEN, label: label("term.engine"), axis: "left" });
+  if (vis.wheel)
+    all.push({ values: whl.map(toPower), color: WHEEL_BLUE, label: label("term.wheel"), axis: "left" });
+  if (vis.loss)
+    all.push({ values: loss.map((l) => toPower(-l)), color: LOSS_ORANGE, label: label("term.loss"), axis: "left" });
+  if (vis.torque)
+    all.push({ values: tq.map(toTorque), color: TORQUE_RED, label: label("term.torque"), axis: "right" });
   const series = all.filter((s) => s.values.length);
 
   let scalars: CropScalars = {

@@ -85,6 +85,22 @@ const es: Messages = {
   "crop.reset": "Restablecer",
   "app.runDate": "Fecha",
   "app.dateNow": "Ahora",
+  "app.saveReadings": "Guardar valores",
+  "toast.readingsSaved": "Valores guardados.",
+  "app.compare": "Comparar ({count})",
+  "app.comparison": "Comparación",
+  "compare.selectHint": "Seleccione 2–4 mediciones para superponer.",
+  "compare.checkTitle": "Añadir a la comparación",
+  "compare.close": "Cerrar comparación",
+  "compare.lineNote": "Línea continua = potencia · línea discontinua = par.",
+  "settings.fieldLabels": "Etiquetas de campo",
+  "settings.fieldLabelsHint": "Cambie el nombre de los rótulos mostrados en pantalla y en las impresiones. Deje en blanco para el valor predeterminado.",
+  "settings.resetLabels": "Restablecer etiquetas",
+  "settings.logo": "Logotipo de impresión",
+  "settings.chooseLogo": "Elegir imagen…",
+  "settings.removeLogo": "Quitar logotipo",
+  "settings.headerText": "Texto de encabezado de impresión",
+  "settings.headerHint": "Deje en blanco para usar el nombre del taller.",
 };
 
 export default es;

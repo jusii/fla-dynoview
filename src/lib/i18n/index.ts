@@ -2,7 +2,7 @@
 // (from the settings store) and falls back to English. Because `t()` reads the
 // reactive `lang()`, any component that calls it re-renders when the language
 // changes.
-import { lang } from "../settings.svelte";
+import { lang, labelOverrides } from "../settings.svelte";
 import en from "./locales/en";
 import fi from "./locales/fi";
 import de from "./locales/de";
@@ -44,4 +44,30 @@ export function t(key: keyof Messages, params?: Record<string, string | number>)
     }
   }
   return s;
+}
+
+/** Field-caption keys the user may rename (Settings → Field labels). */
+export const LABEL_KEYS = [
+  "term.engine",
+  "term.torque",
+  "term.wheel",
+  "term.loss",
+  "abbr.pmax",
+  "abbr.pnim",
+  "abbr.ppyora",
+  "abbr.phavio",
+  "abbr.mmax",
+  "abbr.paine",
+  "abbr.lamp",
+  "abbr.k",
+] as const satisfies readonly (keyof Messages)[];
+
+/**
+ * Resolve a field caption, honouring the user's custom label override (from
+ * settings) before falling back to the localized default. Reactive on both the
+ * override map and the language.
+ */
+export function label(key: (typeof LABEL_KEYS)[number]): string {
+  const ov = labelOverrides()[key];
+  return ov && ov.length ? ov : t(key);
 }

@@ -2,25 +2,34 @@
   import DynoChart from "../charts/DynoChart.svelte";
   import { views } from "../charts/series";
   import type { CropRange } from "../charts/series";
-  import { t } from "../i18n";
+  import { t, label } from "../i18n";
   import * as U from "../units";
   import type { CurrentRun } from "../types";
+  import { curveVisibility, logoDataUri, printHeaderText } from "../settings.svelte";
 
   let {
     current,
     crop,
   }: { current: CurrentRun; crop?: CropRange } = $props();
 
-  const v = $derived(views(current.channels, current.results.kDin, crop));
+  const vis = $derived(curveVisibility());
+  const v = $derived(views(current.channels, current.results.kDin, crop, vis));
   const r = $derived(current.results);
   const s = $derived(v.scalars);
   const pw = (val: number | null | undefined) => (val == null ? "—" : U.power(val).toFixed(1));
+
+  const tempShown = $derived(current.overrides.tempC ?? r.tempC);
+  const pressShown = $derived(current.overrides.pressureHpa ?? r.pressureHpa);
+
+  const logo = $derived(logoDataUri());
+  const headerText = $derived(printHeaderText());
 </script>
 
 <!-- Hidden on screen; shown by the @media print rules in app.css. -->
 <div id="print-report">
   <header class="pr-head">
-    <div class="pr-shop">{current.shopName || t("print.reportTitle")}</div>
+    {#if logo}<img class="pr-logo" src={logo} alt="" />{/if}
+    <div class="pr-shop">{headerText || current.shopName || t("print.reportTitle")}</div>
     <div class="pr-meta">
       <span>{current.title}</span>
       <span>{current.date ?? ""}</span>
@@ -34,33 +43,35 @@
   <table class="pr-table">
     <tbody>
       <tr>
-        <th>{t("abbr.pmax")} ({t("term.engine")})</th>
+        <th>{label("abbr.pmax")} ({label("term.engine")})</th>
         <td>{pw(s.pmaxKw)} {U.unitPower()} @ {s.rpmAtPmax ?? "—"} {U.unitRpm()}</td>
-        <th>{t("abbr.mmax")} ({t("term.torque")})</th>
+        <th>{label("abbr.mmax")} ({label("term.torque")})</th>
         <td>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()} @ {s.rpmAtMmax ?? "—"} {U.unitRpm()}</td>
       </tr>
       <tr>
-        <th>{t("abbr.ppyora")} ({t("term.wheel")})</th>
+        <th>{label("abbr.ppyora")} ({label("term.wheel")})</th>
         <td>{pw(s.ppyoraKw)} {U.unitPower()}</td>
-        <th>{t("abbr.phavio")} ({t("term.loss")})</th>
+        <th>{label("abbr.phavio")} ({label("term.loss")})</th>
         <td>{pw(s.phavioKw)} {U.unitPower()}</td>
       </tr>
       <tr>
-        <th>{t("abbr.k")}</th>
+        <th>{label("abbr.pnim")}</th>
+        <td>{pw(r.pnimKw)} {U.unitPower()}</td>
+        <th>{label("abbr.k")}</th>
         <td>{r.kDin == null ? "—" : r.kDin.toFixed(3)}</td>
-        <th>{t("abbr.paine")} / {t("abbr.lamp")}</th>
-        <td>{r.pressureHpa ?? "—"} {U.unitPressure()} / {r.tempC == null ? "—" : U.temp(r.tempC).toFixed(0)} {U.unitTemp()}</td>
       </tr>
       <tr>
+        <th>{label("abbr.paine")} / {label("abbr.lamp")}</th>
+        <td>{pressShown ?? "—"} {U.unitPressure()} / {tempShown == null ? "—" : U.temp(tempShown).toFixed(0)} {U.unitTemp()}</td>
         <th>{t("print.runDate")}</th>
-        <td colspan="3">{current.date ?? "—"}</td>
+        <td>{current.date ?? "—"}</td>
       </tr>
     </tbody>
   </table>
 
   <div class="chart-block">
-    <h4>{t("term.engine")} [{U.unitPower()}] / {t("term.torque")} [{U.unitTorque()}]</h4>
-    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={1000} height={440} />{/if}
+    <h4>{label("term.engine")} [{U.unitPower()}] / {label("term.torque")} [{U.unitTorque()}]</h4>
+    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={1000} height={440} interactive={false} />{/if}
   </div>
 
   <footer class="pr-foot">{t("print.generatedBy")}</footer>
@@ -75,14 +86,21 @@
   .pr-head {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 12px;
     border-bottom: 2px solid #000;
     padding-bottom: 6px;
     margin-bottom: 10px;
   }
+  .pr-logo {
+    max-height: 46px;
+    max-width: 190px;
+    object-fit: contain;
+  }
   .pr-shop {
     font-size: 18px;
     font-weight: 700;
+    margin-right: auto;
   }
   .pr-meta {
     display: flex;

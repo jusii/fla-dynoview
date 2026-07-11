@@ -71,6 +71,22 @@ const it: Messages = {
   "crop.reset": "Ripristina",
   "app.runDate": "Data",
   "app.dateNow": "Ora",
+  "app.saveReadings": "Salva valori",
+  "toast.readingsSaved": "Valori salvati.",
+  "app.compare": "Confronta ({count})",
+  "app.comparison": "Confronto",
+  "compare.selectHint": "Seleziona 2–4 prove da sovrapporre.",
+  "compare.checkTitle": "Aggiungi al confronto",
+  "compare.close": "Chiudi confronto",
+  "compare.lineNote": "Linea continua = potenza · linea tratteggiata = coppia.",
+  "settings.fieldLabels": "Etichette dei campi",
+  "settings.fieldLabelsHint": "Rinomina le didascalie mostrate a schermo e nelle stampe. Lascia vuoto per il valore predefinito.",
+  "settings.resetLabels": "Reimposta etichette",
+  "settings.logo": "Logo di stampa",
+  "settings.chooseLogo": "Scegli immagine…",
+  "settings.removeLogo": "Rimuovi logo",
+  "settings.headerText": "Testo intestazione di stampa",
+  "settings.headerHint": "Lascia vuoto per usare il nome dell'officina.",
 };
 
 export default it;

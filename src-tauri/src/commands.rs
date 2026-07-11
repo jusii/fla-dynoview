@@ -4,7 +4,7 @@ use crate::db;
 use crate::error::CommandError;
 use crate::model::{
     fmt_date, sha256_hex, DecodedRunDto, ImageSummary, ImportReport, Paths, ResetReport, RunEntry,
-    RunIndexEntry, RunRecord, ShopInfo,
+    RunIndexEntry, RunRecord, ShopInfo, ValueOverrides,
 };
 use fladyno_core::{decode_erg, parse_cfg, DirEntry, Fat12};
 use std::collections::HashSet;
@@ -65,6 +65,7 @@ fn build_record(
         run_date: dto.date.clone(),
         imported_at: chrono::Utc::now().to_rfc3339(),
         description: String::new(),
+        value_overrides: ValueOverrides::default(),
         results: dto.results,
         channels: dto.channels,
     })
@@ -279,10 +280,52 @@ pub async fn update_run_date(
     db::update_date(&db_dir(&app)?, &id, &date)
 }
 
+/// Set a run's display value overrides (temperature / pressure; display-only).
+#[tauri::command]
+pub async fn update_run_overrides(
+    app: tauri::AppHandle,
+    id: String,
+    overrides: ValueOverrides,
+) -> Result<(), CommandError> {
+    db::update_overrides(&db_dir(&app)?, &id, overrides)
+}
+
 /// Remove a run from the library.
 #[tauri::command]
 pub async fn delete_db_run(app: tauri::AppHandle, id: String) -> Result<(), CommandError> {
     db::delete_record(&db_dir(&app)?, &id)
+}
+
+/// Read an image file and return it as a `data:` URI (for the print-header logo).
+/// Rejects oversized files so `settings.json` stays reasonable.
+#[tauri::command]
+pub async fn read_image_data_uri(path: String) -> Result<String, CommandError> {
+    const MAX: usize = 1_500_000;
+    let bytes = read_bytes(&path)?;
+    if bytes.len() > MAX {
+        return Err(CommandError::Other(format!(
+            "image too large ({} KB); please use one under {} KB",
+            bytes.len() / 1024,
+            MAX / 1024
+        )));
+    }
+    let ext = Path::new(&path)
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    let mime = match ext.as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "svg" => "image/svg+xml",
+        "bmp" => "image/bmp",
+        other => return Err(CommandError::Other(format!("unsupported image type: .{other}"))),
+    };
+    use base64::Engine;
+    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    Ok(format!("data:{mime};base64,{b64}"))
 }
 
 // ---------------------------------------------------------------------------

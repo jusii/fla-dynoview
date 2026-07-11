@@ -112,6 +112,16 @@ pub struct Paths {
     pub backups_dir: String,
 }
 
+/// Per-run display overrides for editable readings. Display-only: they replace
+/// the shown number but do **not** recompute the curves / DIN factor. Defaulted
+/// for records written before this field existed.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ValueOverrides {
+    pub temp_c: Option<i16>,
+    pub pressure_hpa: Option<i16>,
+}
+
 /// A full run record persisted to the library (`db/runs/<yyyy>/<date>/<id>.json`).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -130,6 +140,9 @@ pub struct RunRecord {
     pub run_date: Option<String>,
     pub imported_at: String,
     pub description: String,
+    /// User overrides for editable readings (display-only).
+    #[serde(default)]
+    pub value_overrides: ValueOverrides,
     pub results: ResultsDto,
     pub channels: ChannelsDto,
 }

@@ -85,6 +85,22 @@ const de: Messages = {
   "crop.reset": "Zurücksetzen",
   "app.runDate": "Datum",
   "app.dateNow": "Jetzt",
+  "app.saveReadings": "Messwerte speichern",
+  "toast.readingsSaved": "Messwerte gespeichert.",
+  "app.compare": "Vergleichen ({count})",
+  "app.comparison": "Vergleich",
+  "compare.selectHint": "2–4 Messläufe zum Überlagern auswählen.",
+  "compare.checkTitle": "Zum Vergleich hinzufügen",
+  "compare.close": "Vergleich schließen",
+  "compare.lineNote": "Durchgezogene Linie = Leistung · gestrichelte Linie = Drehmoment.",
+  "settings.fieldLabels": "Feldbeschriftungen",
+  "settings.fieldLabelsHint": "Benennen Sie die auf dem Bildschirm und in Ausdrucken angezeigten Beschriftungen um. Für die Standardvorgabe leer lassen.",
+  "settings.resetLabels": "Beschriftungen zurücksetzen",
+  "settings.logo": "Logo drucken",
+  "settings.chooseLogo": "Bild auswählen…",
+  "settings.removeLogo": "Logo entfernen",
+  "settings.headerText": "Kopfzeilentext drucken",
+  "settings.headerHint": "Leer lassen, um den Werkstattnamen zu verwenden.",
 };
 
 export default de;

@@ -71,6 +71,22 @@ const ja: Messages = {
   "crop.reset": "リセット",
   "app.runDate": "日付",
   "app.dateNow": "現在",
+  "app.saveReadings": "測定値を保存",
+  "toast.readingsSaved": "測定値を保存しました。",
+  "app.compare": "比較 ({count})",
+  "app.comparison": "比較",
+  "compare.selectHint": "重ねて表示する測定を2〜4件選択してください。",
+  "compare.checkTitle": "比較に追加",
+  "compare.close": "比較を閉じる",
+  "compare.lineNote": "実線 = 出力 ・ 破線 = トルク。",
+  "settings.fieldLabels": "項目ラベル",
+  "settings.fieldLabelsHint": "画面や印刷物に表示されるキャプションの名称を変更します。空欄にすると既定値になります。",
+  "settings.resetLabels": "ラベルをリセット",
+  "settings.logo": "印刷ロゴ",
+  "settings.chooseLogo": "画像を選択…",
+  "settings.removeLogo": "ロゴを削除",
+  "settings.headerText": "印刷ヘッダーテキスト",
+  "settings.headerHint": "空欄にすると工場名が使われます。",
 };
 
 export default ja;

@@ -71,6 +71,22 @@ const fi: Messages = {
   "crop.reset": "Palauta",
   "app.runDate": "Päivämäärä",
   "app.dateNow": "Nyt",
+  "app.saveReadings": "Tallenna lukemat",
+  "toast.readingsSaved": "Lukemat tallennettu.",
+  "app.compare": "Vertaa ({count})",
+  "app.comparison": "Vertailu",
+  "compare.selectHint": "Valitse 2–4 ajoa vertailuun.",
+  "compare.checkTitle": "Lisää vertailuun",
+  "compare.close": "Sulje vertailu",
+  "compare.lineNote": "Yhtenäinen viiva = teho · katkoviiva = vääntö.",
+  "settings.fieldLabels": "Kenttien nimet",
+  "settings.fieldLabelsHint": "Muuta näytöllä ja tulosteessa näkyvät kenttien nimet. Jätä tyhjäksi käyttääksesi oletusta.",
+  "settings.resetLabels": "Palauta nimet",
+  "settings.logo": "Tulosteen logo",
+  "settings.chooseLogo": "Valitse kuva…",
+  "settings.removeLogo": "Poista logo",
+  "settings.headerText": "Tulosteen otsikkoteksti",
+  "settings.headerHint": "Jätä tyhjäksi käyttääksesi yrityksen nimeä.",
 };
 
 export default fi;
