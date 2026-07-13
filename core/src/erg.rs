@@ -47,8 +47,41 @@ use crate::CoreError;
 const QUAD: usize = 0x800;
 /// Trailer length in bytes.
 const TRAILER: usize = 0x200;
+/// Trailer-relative offset of the format-discriminator `i16`.
+const FMT_MARKER: usize = 0x02;
 /// 60000 / (2π): converts kW and rpm to N·m.
 const TORQUE_CONST: f32 = 9549.296;
+
+/// The `.ERG` file-format variant, discriminated by the `i16` at trailer offset
+/// `+0x02`. FLA v4.1 writes `3`, the newer v4.3 ("G") firmware writes `6`.
+///
+/// Both variants share the identical channel + trailer layout, so decoding is
+/// format-independent; this tag exists only so the UI can distinguish them.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ErgFormat {
+    /// FLA v4.1 (trailer marker == 3).
+    #[default]
+    V41,
+    /// FLA v4.3 "G" (trailer marker == 6).
+    V43,
+    /// Marker absent or unrecognised; decoded fail-soft as v4.1 geometry.
+    Unknown,
+}
+
+/// Classify a `.ERG` payload by its trailer format marker, without decoding.
+///
+/// Never panics: a buffer smaller than the 512-byte trailer, or one whose
+/// marker is neither `3` nor `6`, yields [`ErgFormat::Unknown`].
+pub fn detect_format(bytes: &[u8]) -> ErgFormat {
+    let Some(trailer_off) = bytes.len().checked_sub(TRAILER) else {
+        return ErgFormat::Unknown;
+    };
+    match i16_at(bytes, trailer_off + FMT_MARKER) {
+        Some(3) => ErgFormat::V41,
+        Some(6) => ErgFormat::V43,
+        _ => ErgFormat::Unknown,
+    }
+}
 
 /// The run date carried inside the trailer.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -117,6 +150,8 @@ pub struct Results {
 #[derive(Debug, Clone)]
 pub struct DecodedRun {
     pub size: usize,
+    /// The detected file-format variant (v4.1 / v4.3 / unknown).
+    pub format: ErgFormat,
     pub num_channels: usize,
     pub date: Option<RunDate>,
     pub channels: Channels,
@@ -196,8 +231,14 @@ fn compute_curves(ch: &Channels, k: f32) -> Curves {
     c
 }
 
-/// Decode a `.ERG` payload.
+/// Decode a `.ERG` payload, auto-detecting its format variant.
 pub fn decode(bytes: &[u8]) -> Result<DecodedRun, CoreError> {
+    let format = detect_format(bytes);
+    decode_with(bytes, format)
+}
+
+/// Decode a `.ERG` payload using an already-known [`ErgFormat`].
+fn decode_with(bytes: &[u8], format: ErgFormat) -> Result<DecodedRun, CoreError> {
     let size = bytes.len();
     if size < TRAILER {
         return Err(CoreError::BadErgSize(size));
@@ -291,6 +332,7 @@ pub fn decode(bytes: &[u8]) -> Result<DecodedRun, CoreError> {
 
     Ok(DecodedRun {
         size,
+        format,
         num_channels,
         date,
         channels,
@@ -312,6 +354,7 @@ mod tests {
     fn full_run_synthetic() {
         let mut b = vec![0u8; 8704];
         let t = 8704 - TRAILER;
+        put_i16(&mut b, t + 0x02, 3); // v4.1 format marker
         b[t + 0xAA] = 5;
         b[t + 0xAB] = 5;
         put_i16(&mut b, t + 0xB2, 2000);
@@ -322,6 +365,7 @@ mod tests {
         put_i16(&mut b, 2, 456);
 
         let r = decode(&b).unwrap();
+        assert_eq!(r.format, ErgFormat::V41);
         assert_eq!(r.num_channels, 4);
         assert_eq!(r.date.unwrap(), RunDate { year: 2000, month: 5, day: 5 });
         assert_eq!(r.results.pnim_kw, Some(150));
@@ -345,10 +389,14 @@ mod tests {
     #[test]
     fn trailer_only_512() {
         let mut b = vec![0u8; 512];
+        put_i16(&mut b, 0x02, 6); // marker lives at trailer +0x02, here == whole buffer
         b[0xAA] = 1;
         b[0xAB] = 1;
         put_i16(&mut b, 0xB2, 2010);
         let r = decode(&b).unwrap();
+        // Marker detection works even on a trailer-only (channel-less) buffer.
+        assert_eq!(detect_format(&b), ErgFormat::V43);
+        assert_eq!(r.format, ErgFormat::V43);
         assert_eq!(r.num_channels, 0);
         assert_eq!(r.date.unwrap().year, 2010);
         assert!(r.curves.engine_kw.is_empty());
@@ -357,5 +405,84 @@ mod tests {
     #[test]
     fn too_small_errors() {
         assert_eq!(decode(&[0u8; 100]).unwrap_err(), CoreError::BadErgSize(100));
+    }
+
+    /// Build an 8704-byte full run with the given format marker and two samples
+    /// per channel. ch0 (wheel), ch1 (loss) and ch3 (rpm) are all populated so
+    /// `compute_curves` yields non-empty derived curves — otherwise the
+    /// derived-math parity check in `channels_format_independent` would be
+    /// vacuous (`n = ch0.len().min(ch1.len()).min(ch3.len())` collapses to 0
+    /// when ch1/ch3 are empty).
+    fn synth_full(marker: i16) -> Vec<u8> {
+        let mut b = vec![0u8; 8704];
+        let t = 8704 - TRAILER;
+        put_i16(&mut b, t + 0x02, marker);
+        b[t + 0xAA] = 5;
+        b[t + 0xAB] = 5;
+        put_i16(&mut b, t + 0xB2, 2000);
+        put_i16(&mut b, t + 0xD2, 1013);
+        put_i16(&mut b, t + 0xDA, 20);
+        // ch0 — wheel power ×10
+        put_i16(&mut b, 0, 123);
+        put_i16(&mut b, 2, 456);
+        // ch1 — wheel-loss power ×10 (≤ 0)
+        put_i16(&mut b, QUAD, -12);
+        put_i16(&mut b, QUAD + 2, -34);
+        // ch3 — engine rpm (> 0, so torque is computed)
+        put_i16(&mut b, 3 * QUAD, 3000);
+        put_i16(&mut b, 3 * QUAD + 2, 6000);
+        b
+    }
+
+    #[test]
+    fn detects_v41() {
+        let b = synth_full(3);
+        assert_eq!(detect_format(&b), ErgFormat::V41);
+        let r = decode(&b).unwrap();
+        assert_eq!(r.format, ErgFormat::V41);
+        assert_eq!(r.channels.ch0, vec![123, 456]);
+    }
+
+    #[test]
+    fn detects_v43() {
+        let b = synth_full(6);
+        assert_eq!(detect_format(&b), ErgFormat::V43);
+        let r = decode(&b).unwrap();
+        assert_eq!(r.format, ErgFormat::V43);
+        // Channels still parse regardless of format.
+        assert_eq!(r.channels.ch0, vec![123, 456]);
+    }
+
+    #[test]
+    fn unknown_marker_is_fail_soft() {
+        let b = synth_full(5);
+        assert_eq!(detect_format(&b), ErgFormat::Unknown);
+        // An unrecognised marker must still decode successfully.
+        let r = decode(&b).unwrap();
+        assert_eq!(r.format, ErgFormat::Unknown);
+        assert_eq!(r.channels.ch0, vec![123, 456]);
+    }
+
+    #[test]
+    fn channels_format_independent() {
+        // Identical channel bytes, differing only in the format marker, must
+        // yield identical channels + curves.
+        let v41 = decode(&synth_full(3)).unwrap();
+        let v43 = decode(&synth_full(6)).unwrap();
+        assert_eq!(v41.format, ErgFormat::V41);
+        assert_eq!(v43.format, ErgFormat::V43);
+        assert_eq!(v41.channels, v43.channels);
+        // Guard: the curve-parity assert below is only meaningful if the
+        // derived math actually ran. If synth_full ever stops populating
+        // ch1/ch3, this catches the regression instead of silently comparing
+        // two empty Curves.
+        assert!(!v41.curves.engine_kw.is_empty(), "curve parity would be vacuous");
+        assert_eq!(v41.curves, v43.curves);
+    }
+
+    #[test]
+    fn detect_never_panics_on_tiny() {
+        assert_eq!(detect_format(&[]), ErgFormat::Unknown);
+        assert_eq!(detect_format(&[0u8; 100]), ErgFormat::Unknown);
     }
 }

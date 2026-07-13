@@ -21,6 +21,10 @@ export interface ShopInfo {
   name: string;
 }
 
+// Mirror of the `ErgFormatDto` enum in src-tauri/src/model.rs — keep the string
+// literals here in sync with that enum's serde tags.
+export type ErgFormat = "v41" | "v43" | "unknown";
+
 export interface ChannelsDto {
   ch0: number[];
   ch1: number[];
@@ -44,6 +48,7 @@ export interface ResultsDto {
 
 export interface DecodedRun {
   size: number;
+  format: ErgFormat;
   numChannels: number;
   date: string | null;
   sha256: string;

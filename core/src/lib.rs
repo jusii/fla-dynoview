@@ -22,7 +22,9 @@ pub mod erg;
 pub mod config;
 
 pub use config::{parse_cfg, ShopInfo};
-pub use erg::{decode as decode_erg, Channels, DecodedRun, Results, RunDate};
+pub use erg::{
+    decode as decode_erg, detect_format, Channels, DecodedRun, ErgFormat, Results, RunDate,
+};
 pub use fat12::{DirEntry, Fat12, FatDateTime, IMG_SIZE};
 
 /// Errors produced by the parser core.

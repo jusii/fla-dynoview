@@ -3,7 +3,7 @@
 //! (e.g. in CI, where the copyrighted disk images are not committed) they print
 //! a skip notice and pass, so the suite stays green everywhere.
 
-use fladyno_core::{decode_erg, parse_cfg, Fat12};
+use fladyno_core::{decode_erg, parse_cfg, ErgFormat, Fat12};
 use std::path::PathBuf;
 
 /// Resolve `rel` against the parent project tree (two levels up from this crate).
@@ -32,6 +32,7 @@ fn dska0000_live_run_and_shop_name() {
 
     let run = decode_erg(&fs.read_entry(&ent)).expect("decode 1.ERG");
     assert_eq!(run.num_channels, 4);
+    assert_eq!(run.format, ErgFormat::V41, "the live disk is FLA v4.1");
 
     let d = run.date.expect("run carries a date");
     assert_eq!((d.year, d.month, d.day), (2021, 7, 1), "trailer date");
@@ -86,6 +87,7 @@ fn mystery_corpus_decodes_cleanly() {
     let mut full = 0usize;
     let mut dated = 0usize;
     let mut total = 0usize;
+    let mut v41 = 0usize;
     for entry in std::fs::read_dir(&dir).unwrap() {
         let p = entry.unwrap().path();
         let is_erg = p
@@ -102,6 +104,19 @@ fn mystery_corpus_decodes_cleanly() {
         }
         total += 1;
         let run = decode_erg(&bytes).unwrap();
+        // No-regression lock: no genuine old-firmware run may leak into the
+        // v4.3 bucket. (One file, 52.ERG, is a floppy bad-sector artifact whose
+        // trailer literally reads "-=[BAD SECTOR]=-", so it correctly fail-softs
+        // to Unknown rather than V41 — that is the desired behaviour, not V43.)
+        assert_ne!(
+            run.format,
+            ErgFormat::V43,
+            "mystery corpus (FLA v4.1) must never classify as v4.3: {}",
+            p.display()
+        );
+        if run.format == ErgFormat::V41 {
+            v41 += 1;
+        }
         if run.size == 8704 {
             full += 1;
         }
@@ -111,7 +126,50 @@ fn mystery_corpus_decodes_cleanly() {
             }
         }
     }
-    println!("mystery corpus: total={total} full={full} plausibly-dated={dated}");
+    println!("mystery corpus: total={total} full={full} plausibly-dated={dated} v41={v41}");
     assert!(full > 40, "most runs are full 8704-byte saves");
     assert!(dated > 40, "most runs decode a plausible year");
+    assert!(v41 > 40, "the readable mystery runs are FLA v4.1");
+}
+
+#[test]
+fn v43_corpus_detects_and_decodes() {
+    let Some(dir) = corpus("04-analysis/dyno-results-v43") else {
+        eprintln!("SKIP v43_corpus_detects_and_decodes: corpus absent");
+        return;
+    };
+    let mut total = 0usize;
+    let mut partial_seen = false;
+    for entry in std::fs::read_dir(&dir).unwrap() {
+        let p = entry.unwrap().path();
+        let is_erg = p
+            .extension()
+            .and_then(|s| s.to_str())
+            .map(|s| s.eq_ignore_ascii_case("erg"))
+            .unwrap_or(false);
+        if !is_erg {
+            continue;
+        }
+        let bytes = std::fs::read(&p).unwrap();
+        if bytes.len() < 512 {
+            continue; // empty/aborted saves
+        }
+        total += 1;
+        let run = decode_erg(&bytes).unwrap();
+        assert_eq!(
+            run.format,
+            ErgFormat::V43,
+            "v43 corpus file {} must classify as v4.3",
+            p.display()
+        );
+        // The 2560-byte partial ("15.ERG") must also classify V43.
+        if run.size == 2560 {
+            partial_seen = true;
+        }
+        // Deliberately no year/temp plausibility asserts: real v4.3 files carry
+        // years like 1980/2005 and temps like 200.
+    }
+    println!("v43 corpus: total={total} partial_seen={partial_seen}");
+    assert!(total >= 18, "expected the 18+ full v4.3 runs");
+    assert!(partial_seen, "the 2560-byte partial 15.ERG classifies V43");
 }
