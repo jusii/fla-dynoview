@@ -1,7 +1,7 @@
 //! Serializable DTOs handed to the frontend (camelCase JSON), plus conversions
 //! from the pure-`std` [`fladyno_core`] types.
 
-use fladyno_core::{DecodedRun, Results, RunDate};
+use fladyno_core::{DecodedRun, ErgFormat, Results, RunDate};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
@@ -52,6 +52,28 @@ pub struct ShopInfo {
     pub name: String,
 }
 
+/// The `.ERG` file-format variant, serialized as `"v41"`/`"v43"`/`"unknown"`.
+///
+/// Keep the string tags here in literal sync with the `ErgFormat` union in
+/// `src/lib/types.ts` — the two are hand-maintained mirrors.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ErgFormatDto {
+    V41,
+    V43,
+    Unknown,
+}
+
+impl From<ErgFormat> for ErgFormatDto {
+    fn from(f: ErgFormat) -> Self {
+        match f {
+            ErgFormat::V41 => ErgFormatDto::V41,
+            ErgFormat::V43 => ErgFormatDto::V43,
+            ErgFormat::Unknown => ErgFormatDto::Unknown,
+        }
+    }
+}
+
 /// The four measurement-curve channels (raw `i16` samples).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -85,6 +107,7 @@ pub struct ResultsDto {
 #[serde(rename_all = "camelCase")]
 pub struct DecodedRunDto {
     pub size: usize,
+    pub format: ErgFormatDto,
     pub num_channels: usize,
     pub date: Option<String>,
     pub sha256: String,
@@ -194,6 +217,7 @@ impl DecodedRunDto {
     pub fn from_core(r: &DecodedRun, sha256: String) -> Self {
         DecodedRunDto {
             size: r.size,
+            format: r.format.into(),
             num_channels: r.num_channels,
             date: r.date.as_ref().map(fmt_date),
             sha256,
