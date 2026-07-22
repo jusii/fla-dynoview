@@ -59,6 +59,7 @@ const fi: Messages = {
   "abbr.lamp": "Lämp.",
   "abbr.k": "k",
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "ei päivämäärää",
   "detail.noPower": "Ei tehokäyrää tässä ajossa.",
   "detail.noTorque": "Ei momenttikäyrää tässä ajossa.",

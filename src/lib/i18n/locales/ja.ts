@@ -59,6 +59,7 @@ const ja: Messages = {
   "abbr.lamp": "Temp.",
   "abbr.k": "k",
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "日付なし",
   "detail.noPower": "この測定には出力カーブがありません。",
   "detail.noTorque": "この測定にはトルクカーブがありません。",

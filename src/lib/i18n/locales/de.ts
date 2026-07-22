@@ -72,6 +72,7 @@ const de: Messages = {
   "abbr.k": "k",
   // Detail / Diagramm
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "kein Datum",
   "detail.noPower": "Keine Leistungskurve in diesem Messlauf.",
   "detail.noTorque": "Keine Drehmomentkurve in diesem Messlauf.",

@@ -34,6 +34,7 @@
     runs.forEach((run, i) => {
       const color = PALETTE[i % PALETTE.length];
       const p = physical(run.channels, run.kDin);
+      if (!p.hasRpm) return; // comparison overlays on the rpm axis; skip rpm-less runs
       const cr = autoCrop(run.channels, run.kDin);
       const n = p.rpm.length;
       const a = Math.max(0, Math.floor(cr.start * n));

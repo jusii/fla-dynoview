@@ -17,6 +17,14 @@
   const r = $derived(current.results);
   const s = $derived(v.scalars);
   const pw = (val: number | null | undefined) => (val == null ? "—" : U.power(val).toFixed(1));
+  // "@ rpm" for rpm runs, "@ km/h" for runs recorded without an rpm pickup.
+  const atPmax = $derived(
+    v.hasRpm
+      ? `${s.rpmAtPmax ?? "—"} ${U.unitRpm()}`
+      : s.vAtPmax == null
+        ? "—"
+        : `${U.speed(s.vAtPmax).toFixed(0)} ${U.unitSpeed()}`,
+  );
 
   const tempShown = $derived(current.overrides.tempC ?? r.tempC);
   const pressShown = $derived(current.overrides.pressureHpa ?? r.pressureHpa);
@@ -44,7 +52,7 @@
     <tbody>
       <tr>
         <th>{label("abbr.pmax")} ({label("term.engine")})</th>
-        <td>{pw(s.pmaxKw)} {U.unitPower()} @ {s.rpmAtPmax ?? "—"} {U.unitRpm()}</td>
+        <td>{pw(s.pmaxKw)} {U.unitPower()} @ {atPmax}</td>
         <th>{label("abbr.mmax")} ({label("term.torque")})</th>
         <td>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()} @ {s.rpmAtMmax ?? "—"} {U.unitRpm()}</td>
       </tr>
@@ -71,7 +79,7 @@
 
   <div class="chart-block">
     <h4>{label("term.engine")} [{U.unitPower()}] / {label("term.torque")} [{U.unitTorque()}]</h4>
-    {#if v.series.length}<DynoChart series={v.series} rpm={v.rpm} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={U.unitRpm()} width={1000} height={440} interactive={false} />{/if}
+    {#if v.series.length}<DynoChart series={v.series} rpm={v.x} leftLabel={U.unitPower()} rightLabel={U.unitTorque()} xLabel={v.hasRpm ? U.unitRpm() : U.unitSpeed()} width={1000} height={440} interactive={false} />{/if}
   </div>
 
   <footer class="pr-foot">{t("print.generatedBy")}</footer>

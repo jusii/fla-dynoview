@@ -59,6 +59,7 @@ const pt: Messages = {
   "abbr.lamp": "Temp.",
   "abbr.k": "k",
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "sem data",
   "detail.noPower": "Sem curva de potência neste ensaio.",
   "detail.noTorque": "Sem curva de torque neste ensaio.",

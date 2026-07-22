@@ -72,6 +72,7 @@ const es: Messages = {
   "abbr.k": "k",
   // detalle / gráfico
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "sin fecha",
   "detail.noPower": "No hay curva de potencia en esta medición.",
   "detail.noTorque": "No hay curva de par en esta medición.",

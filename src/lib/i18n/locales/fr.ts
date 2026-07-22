@@ -73,6 +73,7 @@ const fr: Messages = {
   "abbr.k": "k",
   // détail / graphique
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "pas de date",
   "detail.noPower": "Aucune courbe de puissance dans ce passage.",
   "detail.noTorque": "Aucune courbe de couple dans ce passage.",

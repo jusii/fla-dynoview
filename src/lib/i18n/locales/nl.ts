@@ -72,6 +72,7 @@ const nl: Messages = {
   "abbr.k": "k",
   // detail / grafiek
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "geen datum",
   "detail.noPower": "Geen vermogenskromme in deze meting.",
   "detail.noTorque": "Geen koppelkromme in deze meting.",

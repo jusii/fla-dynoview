@@ -60,6 +60,7 @@ const da: Messages = {
   "abbr.lamp": "Temp.",
   "abbr.k": "k",
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "ingen dato",
   "detail.noPower": "Ingen effektkurve i denne kørsel.",
   "detail.noTorque": "Ingen momentkurve i denne kørsel.",

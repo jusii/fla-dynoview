@@ -70,6 +70,7 @@ const en = {
   "abbr.k": "k",
   // detail / chart
   "detail.atN": "@ n",
+  "detail.atV": "@ v",
   "detail.noDate": "no date",
   "detail.noPower": "No power curve in this run.",
   "detail.noTorque": "No torque curve in this run.",

@@ -49,7 +49,11 @@
   <div class="info-title">{current.title} · {current.date ?? t("detail.noDate")}</div>
   <div class="info-grid">
     <div><span>{label("abbr.pmax")}</span>{pw(s.pmaxKw)} {U.unitPower()}</div>
-    <div><span>{t("detail.atN")}</span>{s.rpmAtPmax ?? "—"} {U.unitRpm()}</div>
+    {#if v.hasRpm}
+      <div><span>{t("detail.atN")}</span>{s.rpmAtPmax ?? "—"} {U.unitRpm()}</div>
+    {:else}
+      <div><span>{t("detail.atV")}</span>{s.vAtPmax == null ? "—" : U.speed(s.vAtPmax).toFixed(0)} {U.unitSpeed()}</div>
+    {/if}
     <div><span>{label("abbr.ppyora")}</span>{pw(s.ppyoraKw)} {U.unitPower()}</div>
     <div><span>{label("abbr.phavio")}</span>{pw(s.phavioKw)} {U.unitPower()}</div>
     <div><span>{label("abbr.mmax")}</span>{s.mmaxNm == null ? "—" : U.torque(s.mmaxNm).toFixed(1)} {U.unitTorque()}</div>
@@ -84,10 +88,10 @@
     {#if v.series.length}
       <DynoChart
         series={v.series}
-        rpm={v.rpm}
+        rpm={v.x}
         leftLabel={U.unitPower()}
         rightLabel={U.unitTorque()}
-        xLabel={U.unitRpm()}
+        xLabel={v.hasRpm ? U.unitRpm() : U.unitSpeed()}
       />
     {:else}
       <p class="muted">{t("detail.noPower")}</p>
